@@ -1,3 +1,7 @@
+.idea
+cmake-build-*
+
+# why? its useless
 # Prerequisites
 *.d
 

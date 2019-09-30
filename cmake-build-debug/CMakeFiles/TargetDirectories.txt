@@ -1,3 +1,0 @@
-C:/Users/Igor/Desktop/UDBMS/cmake-build-debug/CMakeFiles/UDBMS.dir
-C:/Users/Igor/Desktop/UDBMS/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/Igor/Desktop/UDBMS/cmake-build-debug/CMakeFiles/rebuild_cache.dir
