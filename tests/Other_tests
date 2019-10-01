@@ -6,9 +6,6 @@
 cd ..
 cd ./cmake-build-debug/
 
-rm report
-touch report
-
 ok_cnt=0
 tests=2
 
@@ -21,7 +18,7 @@ if [ -e config ]
 	 ok_cnt=$(( $ok_cnt + 1))
 	 
 	 currpath=$(sed '' config)
-	 if [ pwd = pwd ]
+	 if [ $currpath = $(pwd) ]
 	 	then
 	  	{
 	  		echo 'OK (Default path is true)'
@@ -31,6 +28,7 @@ if [ -e config ]
 
 echo $ok_cnt'/'$tests 'tests passed' >> report
 
+echo '0'
 
 
 
