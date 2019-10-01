@@ -1,17 +1,17 @@
 #include <iostream>
+#include <fstream>
 #include <filesystem>
 
-int main(int argc, char *argv[]) {
-    auto kal = std::filesystem::current_path();
-    /*
-    TODO: переписать на std::filesystem
+int main() {
     FILE *config;
     config = fopen("config", "r+");
     if (config == nullptr){
         config = fopen("config", "w+");
-        fwrite(argv[0], sizeof(*argv[0]), strlen(argv[0]) - 9, config);
+        fclose(config);
+        std::ofstream out("config");
+        std::string path = std::filesystem::current_path();
+        out << path;
+        out.close();
     }
-    fclose(config);
-    */
     return 0;
 }
