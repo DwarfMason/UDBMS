@@ -1,5 +1,9 @@
 .idea
 cmake-build-*
+generated
+
+##lex generated files
+*.yy
 
 # why? its useless
 # Prerequisites
