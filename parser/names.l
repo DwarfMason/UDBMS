@@ -2,7 +2,6 @@
     #include "commands.h"
 
 %}
-
 %option noinput noyywrap
 
 %%

@@ -5,7 +5,7 @@
 
 
 int yylex();
-int yyerror(char *s);
+int yyerror(std::string  s);
 
 std::vector<std::string> list_vec;
 std::vector<std::pair<std::string,std::string>> decl_vec;
@@ -30,6 +30,8 @@ void show_create(){
 
 	}
 %}
+%defines
+%error-verbose
 
 
 
@@ -131,7 +133,7 @@ std::string parse_request(const char* in) {
   return in;
 }
 
-int yyerror(char *s){
+int yyerror(std::string s){
     std::cerr << s;
     return 0;
 }

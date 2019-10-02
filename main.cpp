@@ -5,7 +5,8 @@
 
 
 int main() {
-    parse_request("quit;");
+    parse_request("create table qwe(int t, int u);\n drop table qwe;\n create show table;");
+
     FILE *config;
     config = fopen("config", "r+");
     if (config == nullptr){
