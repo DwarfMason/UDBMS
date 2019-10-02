@@ -26,7 +26,7 @@ private:
     constraints constraints_;
 };
 
-JSONCONS_GETTER_SETTER_NAMED_TRAITS_DECL(column,
+JSONCONS_GETTER_SETTER_TRAITS_NAMED_DECL(column,
                                          (get_name, set_name, "name"),
                                          (get_type, set_type, "type"),
                                          (get_size, set_size, "size"),

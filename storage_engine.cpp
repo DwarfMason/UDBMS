@@ -9,9 +9,9 @@ table storage_engine::load_table(const std::string &name)
 {
     fs::path metadata_path(METADATA_STORAGE + name + METADATA_EXT);
     if (fs::exists(metadata_path)) {
-        jsoncons::ojson json;
+        jsoncons::json json;
         std::ifstream file(metadata_path);
-        json = jsoncons::ojson::parse(file);
+        json = jsoncons::json::parse(file);
         return json.as<table>();
     }
     else
@@ -22,9 +22,10 @@ table storage_engine::create_table(const std::string &name)
     fs::path metadata_path(METADATA_STORAGE + name + METADATA_EXT);
     if (!fs::exists(metadata_path)) {
         table t(name);
-        jsoncons::ojson json(t);
+        jsoncons::json json(t);
         std::ofstream file(metadata_path);
         file << jsoncons::pretty_print(json);
+        return t;
     }
     else
         throw table_exist_error();
