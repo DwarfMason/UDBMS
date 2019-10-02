@@ -22,7 +22,7 @@ public:
 private:
     std::string name_;
     data_type type_;
-    uint32_t size_;
+    uint32_t size_ = 0;
     constraints constraints_;
 };
 
