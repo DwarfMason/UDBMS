@@ -2,6 +2,7 @@
 #include <fstream>
 #include <filesystem>
 #include "commands.cpp"
+#include "storage_engine.h"
 
 
 int main() {

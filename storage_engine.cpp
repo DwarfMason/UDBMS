@@ -2,7 +2,7 @@
 
 namespace fs = std::filesystem;
 
-const std::string METADATA_STORAGE = "./";
+const auto METADATA_STORAGE = std::filesystem::current_path().string() + "/";
 const std::string METADATA_EXT = ".meta";
 
 table storage_engine::load_table(const std::string &name)

@@ -2,7 +2,8 @@
 
 column::column(std::string name, data_type type)
 {
-
+    set_name(name);
+    set_type(type);
 }
 column::~column()
 {
@@ -12,7 +13,7 @@ void column::set_name(std::string name)
 {
     name_ = std::move(name);
 }
-void column::set_type(const data_type &type)
+void column::set_type(data_type type)
 {
     type_ = type;
 }
@@ -20,7 +21,7 @@ void column::set_size(uint32_t size)
 {
     size_ = size;
 }
-void column::set_constraints(const constraints &cts)
+void column::set_constraints(constraints cts)
 {
     constraints_ = cts;
 }

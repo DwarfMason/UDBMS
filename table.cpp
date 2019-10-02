@@ -25,7 +25,7 @@ const std::vector<column>& table::get_columns() const
 {
     return cols_;
 }
-void table::set_columns(const std::vector<column>& cols)
+void table::set_columns(std::vector<column> cols)
 {
-    cols_ = cols;
+    cols_ = std::move(cols);
 }

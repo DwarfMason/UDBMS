@@ -13,9 +13,9 @@ public:
     void set_unique(bool value);
     void set_index(bool value);
 private:
-    bool not_null_;
-    bool unique_;
-    bool index_;
+    bool not_null_ = false;
+    bool unique_ = false;
+    bool index_ = false;
 };
 
 JSONCONS_GETTER_SETTER_NAMED_TRAITS_DECL(constraints,

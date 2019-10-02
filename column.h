@@ -16,9 +16,9 @@ public:
     [[nodiscard]] uint32_t get_size() const;
     [[nodiscard]] const constraints& get_constraints() const;
     void set_name(std::string name);
-    void set_type(const data_type& type);
+    void set_type(data_type type);
     void set_size(uint32_t size);
-    void set_constraints(const constraints& cts);
+    void set_constraints(constraints cts);
 private:
     std::string name_;
     data_type type_;
