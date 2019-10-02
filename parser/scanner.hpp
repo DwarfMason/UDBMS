@@ -1,5 +1,5 @@
-#ifndef __MCSCANNER_HPP__
-#define __MCSCANNER_HPP__ 1
+#ifndef __SCANNER_HPP__
+#define __SCANNER_HPP__ 1
 
 #if ! defined(yyFlexLexerOnce)
 #include <FlexLexer.h>
@@ -36,4 +36,4 @@ private:
 
 } /* end namespace UDBMS */
 
-#endif /* END __MCSCANNER_HPP__ */
+#endif /* END __SCANNER_HPP__ */

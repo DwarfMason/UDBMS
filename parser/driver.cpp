@@ -12,8 +12,7 @@ UDBMS::Driver::~Driver()
    parser = nullptr;
 }
 
-void
-UDBMS::Driver::parse(std::istream &stream )
+void UDBMS::Driver::parse(std::istream &stream )
 {
    parse_helper( stream );
 }

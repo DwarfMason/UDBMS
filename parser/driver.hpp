@@ -1,5 +1,5 @@
-#ifndef __MCDRIVER_HPP__
-#define __MCDRIVER_HPP__ 1
+#ifndef __DRIVER_HPP__
+#define __DRIVER_HPP__ 1
 
 #include <string>
 #include <cstddef>
@@ -43,4 +43,4 @@ private:
 };
 
 } /* end namespace UDBMS */
-#endif /* END __MCDRIVER_HPP__ */
+#endif /* END __DRIVER_HPP__ */
