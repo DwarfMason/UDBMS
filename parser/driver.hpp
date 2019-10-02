@@ -32,6 +32,8 @@ public:
     void drop_table();
 
     void show_create(std::string name);
+    bool unique = 0;
+    bool constraint = false;
 
 private:
 

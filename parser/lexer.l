@@ -36,7 +36,8 @@ drop                      {return token::DROP;}
 create                    {return token::CREATE;}
 table                     {return token::TABLE;}
 close                     {return token::CLOSE;}
-
+unique                    {return token::UNIQUE;}
+constraint                {return token::CONSTRAINT;}
 int                       {
         yylval->build<std::string>(yytext);
         return token::INT;
