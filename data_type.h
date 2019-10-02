@@ -1,5 +1,5 @@
 #include <cstdint>
-#include <jsoncons/json_type_traits.hpp>
+#include <jsoncons/json.hpp>
 
 enum class data_type: uint8_t
 {

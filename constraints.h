@@ -1,6 +1,6 @@
 #pragma once
 
-#include <jsoncons/json_type_traits.hpp>
+#include <jsoncons/json.hpp>
 
 class constraints
 {

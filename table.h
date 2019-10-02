@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include <jsoncons/json_type_traits.hpp>
+#include <jsoncons/json.hpp>
 #include "column.h"
 
 class table

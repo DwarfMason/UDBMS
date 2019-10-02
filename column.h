@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <jsoncons/json_type_traits.hpp>
+#include <jsoncons/json.hpp>
 #include "constraints.h"
 #include "data_type.h"
 
