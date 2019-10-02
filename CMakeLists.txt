@@ -9,13 +9,19 @@ FIND_PACKAGE(FLEX)
 FIND_PACKAGE(BISON)
 
 
-BISON_TARGET(Parser ${CMAKE_CURRENT_SOURCE_DIR}/parser/commands.y ${CMAKE_CURRENT_BINARY_DIR}/commands.cpp
-        DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/commands.h)
+BISON_TARGET(bison_parser
+        parser/parser.yy
+        ${CMAKE_CURRENT_BINARY_DIR}/parser.tab.cc)
+FLEX_TARGET(flexer
+        parser/lexer.l
+        ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.cc)
+ADD_FLEX_BISON_DEPENDENCY(flexer bison_parser)
 
-FLEX_TARGET(Lexer ${CMAKE_CURRENT_SOURCE_DIR}/parser/names.l ${CMAKE_CURRENT_BINARY_DIR}/names.cpp)
-ADD_FLEX_BISON_DEPENDENCY(Lexer Parser)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(
+    UDBMS
+    PRIVATE
+        .
+        ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(UDBMS
         main.cpp
@@ -25,6 +31,9 @@ add_executable(UDBMS
         constraints.cpp constraints.h
         data_type.cpp data_type.h
         exceptions.cpp exceptions.h
-        ${FLEX_Lexer_OUTPUTS})
+        parser/driver.cpp
+        ${FLEX_flexer_OUTPUTS}
+        ${BISON_bison_parser_OUTPUTS}
+        )
 
 target_link_libraries(UDBMS INTERFACE stdc++fs)

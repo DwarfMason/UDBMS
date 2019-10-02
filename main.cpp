@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include "commands.cpp"
+#include "parser/driver.hpp"
 
 
 int main() {
@@ -15,9 +15,6 @@ int main() {
         out << path;
         out.close();
     }
-    while (1){
-        std::string str;
-        std::getline(std::cin,str);
-        parse_request(str.c_str());
-    }
+    UDBMS::Driver driver;
+    driver.parse( std::cin );
 }
