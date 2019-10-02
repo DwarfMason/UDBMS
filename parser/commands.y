@@ -92,7 +92,7 @@ type:
 	;
 
 decl:
-	type NAME				{decl_vec.emplace_back($1,$2);}
+	| type NAME				{decl_vec.emplace_back($1,$2);}
 	| decl SEP type NAME			{decl_vec.emplace_back($3,$4);}
 	;
 
@@ -134,6 +134,6 @@ std::string parse_request(const char* in) {
 }
 
 int yyerror(std::string s){
-    std::cerr << s;
+    std::cerr << s  << ";\n";
     return 0;
 }
