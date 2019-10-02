@@ -10,7 +10,7 @@ int yyerror(std::string  s);
 std::vector<std::string> list_vec;
 std::vector<std::pair<std::string,std::string>> decl_vec;
 
-void create_table(){
+void create_table(std::string name){
 	std::cout << "_table created: " << "\n";
 		for (int i = 0;i< decl_vec.size();++i){
 			std::cout << decl_vec[i].first <<" "<< decl_vec[i].second <<"\n";
@@ -26,7 +26,7 @@ void drop_table(){
         	    list_vec.clear();
 	 }
 
-void show_create(){
+void show_create(std::string name){
 
 	}
 %}
@@ -82,7 +82,7 @@ command:
 create_table:
 	CREATE TABLE NAME RBRACKET decl	LBRACKET
 	{
-		create_table();
+		create_table($3);
 	}
 type:
 	FLOAT		{ $$ = $1; }
@@ -112,7 +112,7 @@ list:
 show_create:
 	SHOW CREATE TABLE NAME
 	{
-		show_create();
+		show_create($4);
 	}
 	;
 
