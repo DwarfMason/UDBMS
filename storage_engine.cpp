@@ -25,6 +25,7 @@ table storage_engine::create_table(const std::string &name)
         jsoncons::json json(t);
         std::ofstream file(metadata_path);
         file << jsoncons::pretty_print(json);
+        file.close();
         return t;
     }
     else
@@ -35,5 +36,16 @@ void storage_engine::delete_table(const std::string &name)
     fs::path metadata_path(METADATA_STORAGE + name + METADATA_EXT);
 
     if (!fs::remove(metadata_path))
+        throw table_not_exist_error();
+}
+void storage_engine::save_table(const table &tbl)
+{
+    fs::path metadata_path(METADATA_STORAGE + tbl.get_name() + METADATA_EXT);
+    if (fs::exists(metadata_path)) {
+        jsoncons::json json(tbl);
+        std::ofstream file(metadata_path);
+        file << jsoncons::pretty_print(json);
+    }
+    else
         throw table_not_exist_error();
 }
