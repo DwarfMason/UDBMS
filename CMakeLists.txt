@@ -3,6 +3,15 @@ project(UDBMS)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(UDBMS main.cpp)
+include_directories(ext/jsoncons/include)
 
-target_link_libraries(UDBMS stdc++fs)
+add_executable(UDBMS
+        main.cpp
+        storage_engine.cpp storage_engine.h
+        table.cpp table.h
+        column.cpp column.h
+        constraints.cpp constraints.h
+        data_type.cpp data_type.h
+        exceptions.cpp exceptions.h)
+
+target_link_libraries(UDBMS INTERFACE stdc++fs)
