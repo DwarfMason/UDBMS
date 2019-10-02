@@ -1,8 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include "commands.cpp"
+
 
 int main() {
+    parse_request("quit;");
     FILE *config;
     config = fopen("config", "r+");
     if (config == nullptr){
