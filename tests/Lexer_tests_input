@@ -1,0 +1,4 @@
+create table a();
+create tble a();
+create table a;
+quit;

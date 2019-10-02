@@ -10,7 +10,7 @@ cd ./tests
 
 test_cnt=0
 
-for test in $(./*)
+for test in $(./*.sh)
  do 
  if [ $test -eq 0 ]
 then
