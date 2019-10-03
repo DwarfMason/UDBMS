@@ -47,7 +47,7 @@ void UDBMS::Driver::create_table(std::string name)
         storage_engine::save_table(t);
         std::cout << "Table created" << std::endl;
     } catch (sql_error& e) {
-        std::cout << "SQL Error: " << e.what();
+        std::cout << "SQL Error: " << e.what() << std::endl;
     }
     decl_vec.clear();
 }
@@ -58,7 +58,7 @@ void UDBMS::Driver::drop_table()
             storage_engine::delete_table(list_vec[i]);
             std::cout << "Table dropped" << std::endl;
         } catch (sql_error& e) {
-            std::cout << "SQL Error: " << e.what();
+            std::cout << "SQL Error: " << e.what() << std::endl;
         }
     }
     list_vec.clear();
@@ -71,6 +71,6 @@ void UDBMS::Driver::show_create(std::string name)
         std::cout << "       Table: " << t.get_name() << std::endl;
         std::cout << "Create Table: " << storage_engine::show_create_table(t) << std::endl;
     } catch (sql_error& e) {
-        std::cout << "SQL Error: " << e.what();
+        std::cout << "SQL Error: " << e.what() << std::endl;
     }
 }
