@@ -33,14 +33,14 @@ void UDBMS::Driver::create_table(std::string name)
         table t = storage_engine::create_table(name);
         std::vector<column> cols;
         for (int i = 0; i < decl_vec.size(); ++i) {
-            auto col_type_str = decl_vec[i].first;
+            auto col_type_str = decl_vec[i].second;
             data_type col_type;
             if (col_type_str == "int") {
                 col_type = data_type::INTEGER;
             } else if (col_type_str == "float") {
                 col_type = data_type::FLOAT;
             }
-            column col(decl_vec[i].second, col_type);
+            column col(decl_vec[i].first, col_type);
             cols.push_back(col);
         }
         t.set_columns(cols);
