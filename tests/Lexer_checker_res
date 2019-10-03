@@ -1,3 +1,4 @@
-  _table created: 
- syntax error, unexpected NAME, expecting TABLE;
-  syntax error, unexpected END, expecting RBRACKET;
+terminate called after throwing an instance of 'table_exist_error'
+  what():  Table does already exist
+./Lexer_tests.sh: строка 17:  1625 Аварийный останов         (стек памяти сброшен на диск) ./UDBMS < ../tests/Lexer_tests_input
+0

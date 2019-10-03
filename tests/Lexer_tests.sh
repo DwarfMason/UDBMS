@@ -21,15 +21,16 @@ ok_cnt=0
 
 while read LINE; do
     buff=`head -n $str_cnt ../tests/Lexer_checker_sol | tail -n +$str_cnt`
-	if [$buffer = $LINE]
+	if [ "$buff" == "$LINE" ]
 	then
 		ok_cnt=$(( $ok_cnt + 1 )) 
+		echo 'OK' >> report
 	else
-		echo 'Test' $str_cnt 'failed'
+    	echo 'Test' $str_cnt 'failed' >> report
 	fi
 	str_cnt=$(( $str_cnt + 1 ))
 done < ../tests/Lexer_checker_res
 
-echo $ok_cnt'/'$str_cnt 'tests passed' >> report
+echo $ok_cnt'/'$(( $str_cnt - 1 )) 'tests passed' >> report
 
 echo '0'
