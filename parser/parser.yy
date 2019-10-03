@@ -44,9 +44,9 @@
 %token<std::string>          DOUBLE
 %token<std::string>          STRING
 
-%token                 UNIQUE
+%token                 PRIMARY
 %token                 CONSTRAINT
-%token                 FOREIGN
+%token                 UNIQUE
 %token                 KEY
 
 %token<int>          NUMBER
@@ -83,7 +83,6 @@ create_table:
 
 constr: /*empty*/
     | SEP CONSTRAINT NAME RBRACKET sublist LBRACKET
-    | SEP FOREIGN KEY
     ;
 
 type:
@@ -106,6 +105,7 @@ sublist:
 flags
     :
     | UNIQUE    {driver.unique = true;}
+    | PRIMARY KEY
     ;
 
 drop_table:
@@ -134,5 +134,9 @@ show_create:
 void UDBMS::DParse::error( const location_type &l, const std::string &err_message )
 {
    std::cerr << "Error: " << err_message << " at " << l << "\n";
+   std::string tmp;
+   while (!std::cin.eof()){
+    std::cin >> tmp;
+   }
    driver.parse( std::cin );
 }
