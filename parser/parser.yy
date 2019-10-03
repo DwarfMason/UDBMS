@@ -93,8 +93,8 @@ type:
 	;
 
 decl:
-	| type NAME	flags	        {driver.decl_vec.emplace_back($1,$2);}
-	| decl SEP type NAME flags	{driver.decl_vec.emplace_back($3,$4);}
+	| NAME type	flags	        {driver.decl_vec.emplace_back($2,$1);}
+	| decl SEP NAME type flags	{driver.decl_vec.emplace_back($4,$3);}
 	;
 
 sublist:
@@ -134,9 +134,9 @@ show_create:
 void UDBMS::DParse::error( const location_type &l, const std::string &err_message )
 {
    std::cerr << "Error: " << err_message << " at " << l << "\n";
-   std::string tmp;
+   /*std::string tmp;
    while (!std::cin.eof()){
     std::cin >> tmp;
-   }
+   }*/
    driver.parse( std::cin );
 }

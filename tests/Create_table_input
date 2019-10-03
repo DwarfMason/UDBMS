@@ -1,0 +1,6 @@
+create table a();
+create table b( a int, b float);
+create table a();
+create table c( a int UNIQUE, b float, c int(4));
+create table d( a int(4));
+quit;

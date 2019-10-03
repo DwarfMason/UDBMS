@@ -29,7 +29,7 @@ using token = UDBMS::DParse::token;
             yylval = lval;
 %}
 
-db_quit\(\);              {return token::END ;}
+quit;              {return token::END ;}
 
 show                      {return token::SHOW;}
 drop                      {return token::DROP;}
