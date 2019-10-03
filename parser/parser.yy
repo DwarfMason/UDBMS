@@ -30,13 +30,13 @@
 %define api.value.type variant
 %define parse.assert
 
-%token               END
-%token               SHOW
-%token               DROP
-%token               CREATE
-%token               TABLE
-%token               CLOSE
-%token               CHAR
+%token                      END
+%token                      SHOW
+%token                      DROP
+%token                      CREATE
+%token                      TABLE
+%token                      CLOSE
+%token                      CHAR
 %token<std::string>             NAME
 %token<std::string>             FLOATING
 %token<std::string>          INT
@@ -73,10 +73,17 @@ command:
 //
 
 create_table:
-	CREATE TABLE NAME RBRACKET decl	LBRACKET
+	CREATE TABLE NAME RBRACKET decl	constr LBRACKET
 	{
 		driver.create_table($3);
 	}
+	;
+
+constr: /*empty*/
+    | SEP CONSTRAINT NAME RBRACKET sublist LBRACKET
+    | SEP
+    ;
+
 type:
 	FLOAT		{ $$ = $1; }
     |DOUBLE		{ $$ = $1; }
@@ -87,7 +94,6 @@ type:
 decl:
 	| type NAME	flags	        {driver.decl_vec.emplace_back($1,$2);}
 	| decl SEP type NAME flags	{driver.decl_vec.emplace_back($3,$4);}
-	| decl SEP CONSTRAINT NAME RBRACKET sublist LBRACKET
 	;
 
 sublist:

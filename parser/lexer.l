@@ -55,10 +55,15 @@ string                    {
         return token::STRING;
         }
 
-[A-Za-z_][A-Za-z_0-9]*     {
+(^`)[A-Za-z_][A-Za-z_0-9]*(`$)  {
         yylval->build<std::string>(yytext);
         return token::NAME;
         }
+[A-Za-z_][A-Za-z_0-9]*  {
+        yylval->build<std::string>(yytext);
+        return token::NAME;
+        }
+
 -?[1-9][0-9]*             {
         yylval->build<int>() = atoi(yytext);
         return token::NUMBER;
