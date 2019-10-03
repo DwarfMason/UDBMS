@@ -38,6 +38,8 @@ table                     {return token::TABLE;}
 close                     {return token::CLOSE;}
 unique                    {return token::UNIQUE;}
 constraint                {return token::CONSTRAINT;}
+foreing                   {return token::FOREIGN;}
+key                       {return token::KEY;}
 int                       {
         yylval->build<std::string>(yytext);
         return token::INT;

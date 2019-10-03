@@ -46,6 +46,8 @@
 
 %token                 UNIQUE
 %token                 CONSTRAINT
+%token                 FOREIGN
+%token                 KEY
 
 %token<int>          NUMBER
 
@@ -81,7 +83,7 @@ create_table:
 
 constr: /*empty*/
     | SEP CONSTRAINT NAME RBRACKET sublist LBRACKET
-    | SEP
+    | SEP FOREIGN KEY
     ;
 
 type:
@@ -115,7 +117,7 @@ drop_table:
 
 list:
 		NAME				    {driver.list_vec.push_back($1);}
-	|	list SEP NAME			{driver.list_vec.push_back($3);std::cout<<$3<<"\n";}
+	|	list SEP NAME			{driver.list_vec.push_back($3);}
 	;
 
 show_create:
