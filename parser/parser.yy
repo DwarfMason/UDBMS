@@ -93,8 +93,8 @@ type:
 	;
 
 decl:
-	| NAME type	flags	        {driver.decl_vec.emplace_back($2,$1);}
-	| decl SEP NAME type flags	{driver.decl_vec.emplace_back($4,$3);}
+	| NAME type	flags	        {driver.decl_vec.emplace_back($1,$2);}
+	| decl SEP NAME type flags	{driver.decl_vec.emplace_back($3,$4);}
 	;
 
 sublist:
