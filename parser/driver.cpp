@@ -44,7 +44,7 @@ void UDBMS::Driver::create_table(std::string name)
     }
     t.set_columns(cols);
     storage_engine::save_table(t);
-    std::clog << "Table created" << std::endl;
+    std::cout << "Table created" << std::endl;
     decl_vec.clear();
 }
 void UDBMS::Driver::drop_table()
@@ -52,7 +52,7 @@ void UDBMS::Driver::drop_table()
     for (int i = 0; i < list_vec.size(); ++i) {
         storage_engine::delete_table(list_vec[i]);
     }
-    std::clog << "Table dropped" << std::endl;
+    std::cout << "Table dropped" << std::endl;
     list_vec.clear();
 }
 void UDBMS::Driver::show_create(std::string name)
