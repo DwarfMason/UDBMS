@@ -61,7 +61,7 @@
 
 commands: /* empty */
 	|	commands command DIV
-        ;
+    ;
 
 command:
 		drop_table
@@ -134,4 +134,5 @@ show_create:
 void UDBMS::DParse::error( const location_type &l, const std::string &err_message )
 {
    std::cerr << "Error: " << err_message << " at " << l << "\n";
+   driver.parse( std::cin );
 }

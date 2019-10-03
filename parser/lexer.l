@@ -19,7 +19,7 @@ using token = UDBMS::DParse::token;
 
 %}
 
-%option debug
+
 %option yyclass="UDBMS::Scanner"
 %option noyywrap
 %option c++
@@ -70,7 +70,6 @@ string                    {
         yylval->build<int>() = atoi(yytext);
         return token::NUMBER;
         }
-
 \(                        {return token::RBRACKET;}
 \)                        {return token::LBRACKET;}
 ,                         {return token::SEP;}
