@@ -45,7 +45,7 @@ void UDBMS::Driver::create_table(std::string name)
         }
         t.set_columns(cols);
         storage_engine::save_table(t);
-        std::cout << "Table created" << std::endl;
+        std::cout << "Table created" << std::endl;-
     } catch (sql_error& e) {
         std::cout << "SQL Error: " << e.what() << std::endl;
     }
