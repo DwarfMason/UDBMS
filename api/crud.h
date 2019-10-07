@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <table.h>
+#include <api/table.h>
 
 namespace API
 {

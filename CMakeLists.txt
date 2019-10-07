@@ -26,15 +26,15 @@ include_directories(
 add_executable(UDBMS
         main.cpp
         engine/storage_engine.cpp engine/storage_engine.h
-        table.cpp table.h
-        column.cpp column.h
-        constraints.cpp constraints.h
-        data_type.cpp data_type.h
+        api/table.cpp api/table.h
+        api/column.cpp api/column.h
+        api/constraints.cpp api/constraints.h
+        api/data_type.cpp api/data_type.h
         exceptions.cpp exceptions.h
         parser/driver.cpp
         ${FLEX_flexer_OUTPUTS}
         ${BISON_bison_parser_OUTPUTS}
         api/crud.cpp api/crud.h
-        constants.h)
+        constants.h engine/table_data.cpp engine/table_data.h)
 
 target_link_libraries(UDBMS INTERFACE stdc++fs)

@@ -3,7 +3,7 @@
 #include <string>
 #include <filesystem>
 #include <fstream>
-#include "table.h"
+#include "api/table.h"
 #include "exceptions.h"
 
 class storage_engine
