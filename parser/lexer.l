@@ -77,10 +77,10 @@ NULL        { return token::NULL_y;   }
 
 
 [-+&~|^/%*(),.;!]   { return yytext[0]; }
+=                   { return yytext[0]; }
 
-
-[A-Za-z][A-Za-z0-9_]*   { yylval->build<char*>() = yytext; return token::NAME; }
-`[^`/\\.\n]+`           { yylval->build<char*>() = yytext; return token::NAME; }
+[A-Za-z][A-Za-z0-9_]*               { yylval->build<char*>() = yytext; return token::NAME; }
+`[^`/\\.\n]+`         { yylval->build<char*>() = yytext; return token::NAME; }
 
 
 TRUE    { yylval->build<bool>() = atoi(yytext); return token::BOOL; }

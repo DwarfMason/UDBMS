@@ -12,7 +12,10 @@
     #include "parser/statement/CreateStatement.h"
     #include "parser/statement/ShowCreateStatement.h"
     #include "parser/statement/DropTableStatement.h"
-
+    #include "parser/statement/DeleteStatement.h"
+    #include "parser/statement/InsertStatement.h"
+    #include "parser/statement/SelectStatement.h"
+    #include "parser/statement/UpdateStatement.h"
    namespace UDBMS {
       class Driver;
       class Scanner;
@@ -81,9 +84,9 @@ void emit(char *s,...);
 
 %locations
 
-%type<std::vector<std::string>> select_expr_list name_list_expr
+%type<std::vector<std::string>> name_list_expr
 
-/* create table*/
+/* create Table*/
 %type<std::vector<CreateStatement::Constraint>> additional_constraints
 %type<CreateStatement::Constraint> additional_params
 %type<CreateStatement::Statement> create_params
@@ -95,8 +98,21 @@ void emit(char *s,...);
 %type<CreateStatement::Type> var_type
 /* show create */
 %type<ShowCreateStatement::Statement> show_create
-/* drop table */
+/* drop Table */
 %type<DropTableStatement::Statement> drop_table_stmt
+
+/*insert*/
+%type<InsertStatement::Statement> insert_stmt
+/*delete*/
+%type<DeleteStatement::Statement> delete_stmt
+/*update*/
+%type<UpdateStatement::Statement> update_stmt
+/*select*/
+%type<SelectStatement::Statement> select_stmt
+%type<std::vector<std::string>> selector
+
+/*expr*/ /*TODO*/
+%type<std::pair<std::string,std::string>> expr
 %start stmt_list
 %%
 
@@ -113,7 +129,7 @@ stmt
     ;
 
 
-/*create table*/
+/*create Table*/
 create_stmt:
     CREATE TABLE NAME '('
     create_params ')' {$5.tableName = $3; driver.create_table($5);}
@@ -160,7 +176,7 @@ constraints_expr            /*Constraint_expr*/
     | UNIQUE '(' name_list_expr ')'             {$$ = CreateStatement::Constraint_expr();$$.type = CreateStatement::Constraints::UNIQUE;$$.keys = $3;}
     ;
 
-/*end create table*/
+/*end create Table*/
 
 /*show create*/
 show_create:
@@ -173,7 +189,7 @@ show_create:
 	;
 /*end show create*/
 
-/*drop table*/
+/*drop Table*/
 drop_table_stmt:
 	DROP TABLE name_list_expr
 	{
@@ -182,8 +198,73 @@ drop_table_stmt:
 	 	driver.drop_table($$);
 	}
 	;
-/*end drop table */
+/*end drop Table */
 
+
+
+
+
+/*insert*/
+insert_stmt:        /*InsertStatement::Statement*/
+    INSERT INTO NAME '(' name_list_expr ')'
+    VALUES '(' name_list_expr ')'   {
+        $$ = InsertStatement::Statement();
+        $$.name = $3;
+        $$.cols = $5;
+        $$.vaule = $9;
+        /*TODO USE DRIVER*/
+
+    }
+    ;
+/*end insert*/
+
+/*update stmt*/
+update_stmt:        /*UpdateStatement::Statement*/
+    UPDATE NAME SET NAME '=' NAME expr  {
+        $$ = UpdateStatement::Statement();
+        $$.toUpdate = $2;
+        $$.columnName = $4;
+        $$.newValue = $6;
+        $$.expr = $7;
+        /*TODO USE DRIVER*/
+    }
+    ;
+
+/*end update stmt*/
+
+/*delete stmt*/
+delete_stmt:            /*DeleteStatement::Statement*/
+    DELETE FROM NAME
+    WHERE expr              {
+        $$ = DeleteStatement::Statement();
+        $$.name = $3;
+        $$.expr = $5;
+        /*TODO USE DRIVER*/
+    }
+    ;
+
+/*end delete stmt*/
+
+/*select expr*/
+select_stmt:            /*SelectStatement::Statement*/
+    SELECT selector FROM NAME WHERE expr    {
+        $$ = SelectStatement::Statement();
+        $$.selector = $2;
+        $$.expr = $6;
+        /*TODO USE DRIVER*/
+    }
+    ;
+
+selector    /*std::vector<std::string> */
+    : '*'                       {$$ = std::vector<std::string>();$$.push_back("*");}
+    | name_list_expr            {$$ = $1;}
+
+/*end select expr*/
+
+/*expr */ /*TODO*/
+    expr:
+        NAME '=' NAME {$$ = std::pair<std::string,std::string>($1,$3);}
+    ;
 /*common*/
 name_list_expr      /*std::vector<std::string>*/
     : NAME                      {$$ = std::vector<std::string>();$$.push_back($1);}

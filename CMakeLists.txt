@@ -36,10 +36,9 @@ add_executable(UDBMS
         ${BISON_bison_parser_OUTPUTS}
         api/crud.cpp api/crud.h
         constants.h engine/table_data.cpp engine/table_data.h
-        parser/statement/type_include.h
         parser/statement/BaseStatement.h
         parser/statement/CreateStatement.h
         parser/statement/ShowCreateStatement.h
-        parser/statement/DropTableStatement.h api/cursor.cpp api/cursor.h)
+        parser/statement/DropTableStatement.h api/cursor.cpp api/cursor.h parser/statement/InsertStatement.h parser/statement/UpdateStatement.h parser/statement/DeleteStatement.h parser/statement/SelectStatement.h)
 
 target_link_libraries(UDBMS INTERFACE stdc++fs)
