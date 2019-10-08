@@ -2,55 +2,28 @@
 
 namespace fs = std::filesystem;
 
-const auto METADATA_STORAGE = std::filesystem::current_path().string() + "/";
+const auto DATA_PATH = std::filesystem::current_path().string() + "/";
 const std::string METADATA_EXT = ".meta";
 
 table storage_engine::load_table(const std::string &name)
 {
-    fs::path metadata_path(METADATA_STORAGE + name + METADATA_EXT);
-    if (fs::exists(metadata_path)) {
-        jsoncons::json json;
-        std::ifstream file(metadata_path);
-        json = jsoncons::json::parse(file);
-        return json.as<table>();
-    }
-    else
-        throw table_not_exist_error();
+    throw std::logic_error("This function has been moved to the API section.");
 }
 table storage_engine::create_table(const std::string &name)
 {
-    fs::path metadata_path(METADATA_STORAGE + name + METADATA_EXT);
-    if (!fs::exists(metadata_path)) {
-        table t(name);
-        jsoncons::json json(t);
-        std::ofstream file(metadata_path);
-        file << jsoncons::pretty_print(json);
-        file.close();
-        return t;
-    }
-    else
-        throw table_exist_error();
+    throw std::logic_error("This function has been moved to the API section.");
 }
 void storage_engine::delete_table(const std::string &name)
 {
-    fs::path metadata_path(METADATA_STORAGE + name + METADATA_EXT);
-
-    if (!fs::remove(metadata_path))
-        throw table_not_exist_error();
+    throw std::logic_error("This function has been moved to the API section.");
 }
 void storage_engine::save_table(const table &tbl)
 {
-    fs::path metadata_path(METADATA_STORAGE + tbl.get_name() + METADATA_EXT);
-    if (fs::exists(metadata_path)) {
-        jsoncons::json json(tbl);
-        std::ofstream file(metadata_path);
-        file << jsoncons::pretty_print(json);
-    }
-    else
-        throw table_not_exist_error();
+    throw std::logic_error("This function has been moved to the API section.");
 }
 std::string storage_engine::show_create_table(const table &tbl)
 {
+    throw std::logic_error("This function should have been moved to the LOGIC section.");
     std::stringstream sql;
     sql << "CREATE TABLE `" << tbl.get_name() << "` (" << std::endl;
     const auto& cols = tbl.get_columns();
