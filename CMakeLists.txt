@@ -40,6 +40,6 @@ add_executable(UDBMS
         parser/statement/BaseStatement.h
         parser/statement/CreateStatement.h
         parser/statement/ShowCreateStatement.h
-        parser/statement/DropTableStatement.h)
+        parser/statement/DropTableStatement.h api/cursor.cpp api/cursor.h)
 
 target_link_libraries(UDBMS INTERFACE stdc++fs)

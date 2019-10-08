@@ -11,7 +11,7 @@ struct sql_error : public std::runtime_error
         error_code_ = errcode;
         msg_ = msg;
     }
-    virtual const char* what() const noexcept
+    [[nodiscard]] const char* what() const noexcept final
     {
         return ("Error " + std::to_string(error_code_) + ": " + msg_).c_str();
     }
