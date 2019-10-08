@@ -10,6 +10,8 @@
 %code requires{
 
     #include "parser/statement/CreateStatement.h"
+    #include "parser/statement/ShowCreateStatement.h"
+    #include "parser/statement/DropTableStatement.h"
 
    namespace UDBMS {
       class Driver;
@@ -91,6 +93,10 @@ void emit(char *s,...);
 %type<int> create_flag
 %type<CreateStatement::Constraint_expr> constraints_expr
 %type<CreateStatement::Type> var_type
+/* show create */
+%type<ShowCreateStatement::Statement> show_create
+/* drop table */
+%type<DropTableStatement::Statement> drop_table_stmt
 %start stmt_list
 %%
 
@@ -102,13 +108,15 @@ stmt_list
 
 stmt
     : create_stmt
+    | show_create
+    | drop_table_stmt
     ;
 
 
 /*create table*/
 create_stmt:
     CREATE TABLE NAME '('
-    create_params ')'
+    create_params ')' {$5.tableName = $3; driver.create_table($5);}
     ;
 
 create_params               /*Statement*/
@@ -153,6 +161,28 @@ constraints_expr            /*Constraint_expr*/
     ;
 
 /*end create table*/
+
+/*show create*/
+show_create:
+	SHOW CREATE TABLE NAME
+	{
+	    $$ = ShowCreateStatement::Statement();
+	    $$.name = $4;
+		driver.show_create($$);
+	}
+	;
+/*end show create*/
+
+/*drop table*/
+drop_table_stmt:
+	DROP TABLE name_list_expr
+	{
+	    $$ = DropTableStatement::Statement();
+        $$.keys = $3;
+	 	driver.drop_table($$);
+	}
+	;
+/*end drop table */
 
 /*common*/
 name_list_expr      /*std::vector<std::string>*/

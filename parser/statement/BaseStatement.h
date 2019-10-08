@@ -6,7 +6,7 @@
 #define BASESTATEMENT_H
 
 
-class BaseStatement
+struct BaseStatement
 {
 
 };

@@ -4,6 +4,8 @@
 #include <string>
 #include <cstddef>
 #include <istream>
+#include <parser/statement/ShowCreateStatement.h>
+#include <parser/statement/DropTableStatement.h>
 
 #include "scanner.hpp"
 #include "parser.tab.hh"
@@ -46,17 +48,17 @@ public:
         );
 
 
-    void create_table(std::string name);
+    void create_table(CreateStatement::Statement stmt);
 
     /*
     * DROP TABLE name_list_expr;
     */
-    void drop_table(std::vector<std::string> name_list_expr);
+    void drop_table(DropTableStatement::Statement stmt);
 
     /*
     * SHOW CREATE TABLE table_name;
     */
-    void show_create(std::string name);
+    void show_create(ShowCreateStatement::Statement stmt);
     bool unique = 0;
     bool constraint = false;
 

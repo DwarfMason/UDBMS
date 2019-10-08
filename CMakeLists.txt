@@ -34,6 +34,6 @@ add_executable(UDBMS
         parser/driver.cpp
         ${FLEX_flexer_OUTPUTS}
         ${BISON_bison_parser_OUTPUTS}
-        parser/statement/type_include.h parser/statement/BaseStatement.cpp parser/statement/BaseStatement.h parser/statement/CreateStatement.cpp parser/statement/CreateStatement.h)
+        parser/statement/type_include.h parser/statement/BaseStatement.h parser/statement/CreateStatement.h parser/statement/ShowCreateStatement.h parser/statement/DropTableStatement.h)
 
 target_link_libraries(UDBMS INTERFACE stdc++fs)

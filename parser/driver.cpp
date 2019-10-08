@@ -26,15 +26,15 @@ void UDBMS::Driver::parse_helper(std::istream &stream )
                                     (*this) /* driver */ );
       parser->parse();
 }
-void UDBMS::Driver::create_table(std::string name)
+void UDBMS::Driver::create_table(CreateStatement::Statement stmt)
 {
 
 }
-void UDBMS::Driver::drop_table(std::vector<std::string> name_list_expr)
+void UDBMS::Driver::drop_table(DropTableStatement::Statement stmt)
 {
 
 }
-void UDBMS::Driver::show_create(std::string name)
+void UDBMS::Driver::show_create(ShowCreateStatement::Statement stmt)
 {
 
 }
