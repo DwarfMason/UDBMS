@@ -24,7 +24,7 @@ void storage_engine::save_table(const table &tbl)
 std::string storage_engine::show_create_table(const table &tbl)
 {
     throw std::logic_error("This function should have been moved to the LOGIC section.");
-    std::stringstream sql;
+    /*std::stringstream sql;
     sql << "CREATE TABLE `" << tbl.get_name() << "` (" << std::endl;
     const auto& cols = tbl.get_columns();
     std::vector<std::string> unique_keys, primary_keys;
@@ -39,7 +39,7 @@ std::string storage_engine::show_create_table(const table &tbl)
             case data_type::FLOAT:
                 type = "float";
                 break;
-            case data_type::VARCHAR:
+            case data_type::CHAR:
                 type = "varchar";
                 break;
         }
@@ -67,4 +67,10 @@ std::string storage_engine::show_create_table(const table &tbl)
     }
     sql << std::endl << ");";
     return sql.str();
+    */
+}
+
+table_data storage_engine::save_data(const table_data &data)
+{
+    return table_data();
 }

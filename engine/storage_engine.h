@@ -5,13 +5,16 @@
 #include <fstream>
 #include "api/table.h"
 #include "exceptions.h"
+#include "table_data.h"
 
-class storage_engine
+namespace storage_engine
 {
-public:
-    static table load_table(const std::string &name);
-    static void save_table(const table &tbl);
-    static table create_table(const std::string &name);
-    static void delete_table(const std::string &name);
-    static std::string show_create_table(const table &tbl);
+    table load_table(const std::string &name);
+    void save_table(const table &tbl);
+    table create_table(const std::string &name);
+    void delete_table(const std::string &name);
+    std::string show_create_table(const table &tbl);
+
+    table_data save_data(const table_data& data);
+    table_data load_data(const std::string& name);
 };

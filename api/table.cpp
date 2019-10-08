@@ -7,6 +7,13 @@ table::table(const std::string& name)
     set_name(name);
 }
 
+table::table(const table &tbl)
+{
+    // We need this because table_data has a deleted constructor
+    set_name(tbl.name_);
+    set_columns(tbl.cols_);
+}
+
 table::~table()
 {
 
