@@ -3,12 +3,12 @@
 cd ..
 cd ./cmake-build-debug/
 
-rm ../tests/Lexer_checker_res
-touch ../tests/Lexer_checker_res
+rm ../tests/Lexer_tests_res
+touch ../tests/Lexer_tests_res
 
 
-exec 3>&1 1>> ../tests/Lexer_checker_res
-exec 4>&2 2>> ../tests/Lexer_checker_res
+exec 3>&1 1>> ../tests/Lexer_tests_res
+exec 4>&2 2>> ../tests/Lexer_tests_res
 
 if ./UDBMS< ../tests/Lexer_tests_input
 then
@@ -20,16 +20,19 @@ str_cnt=1
 ok_cnt=0
 
 while read LINE; do
-    buff=`head -n $str_cnt ../tests/Lexer_checker_sol | tail -n +$str_cnt`
+    buff=`head -n $str_cnt ../tests/Lexer_tests_sol | tail -n +$str_cnt`
 	if [ "$buff" == "$LINE" ]
 	then
 		ok_cnt=$(( $ok_cnt + 1 )) 
 		echo 'OK' >> report
 	else
-    	echo 'Test' $str_cnt 'failed' >> report
+		echo '---------------------------------' >> report
+    	echo 'Test' "$str_cnt" 'failed' >> report
+    	echo 'Expected:' $buff $'\n''Got:' $LINE >> report
+    	echo '---------------------------------' >> report
 	fi
 	str_cnt=$(( $str_cnt + 1 ))
-done < ../tests/Lexer_checker_res
+done < ../tests/Lexer_tests_res
 
 echo $ok_cnt'/'$(( $str_cnt - 1 )) 'tests passed' >> report
 

@@ -26,7 +26,10 @@ while read LINE; do
 		ok_cnt=$(( $ok_cnt + 1 )) 
 		echo 'OK' >> report
 	else
-    	echo 'Test' $str_cnt 'failed' >> report
+		echo '---------------------------------' >> report
+    	echo 'Test' "$str_cnt" 'failed' >> report
+    	echo 'Expected:' $buff $'\n''Got:' $LINE >> report
+    	echo '---------------------------------' >> report
 	fi
 	str_cnt=$(( $str_cnt + 1 ))
 done < ../tests/Create_table_res
