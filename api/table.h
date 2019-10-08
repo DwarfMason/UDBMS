@@ -10,11 +10,10 @@ class table
 {
 public:
     table() = default;
-    table(const table& tbl);
-    explicit table(const std::string& name);
+    table(const std::string &name);
     ~table();
     [[nodiscard]] std::string get_name() const;
-    [[nodiscard]] const std::vector<column>& get_columns() const;
+    [[nodiscard]] const std::vector<column> &get_columns() const;
     void set_name(std::string name);
     void set_columns(std::vector<column> cols);
 private:

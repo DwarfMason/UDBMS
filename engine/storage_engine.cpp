@@ -72,5 +72,5 @@ std::string storage_engine::show_create_table(const table &tbl)
 
 table_data storage_engine::save_data(const table_data &data)
 {
-    return table_data();
+
 }
