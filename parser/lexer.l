@@ -1,80 +1,88 @@
+%option noyywrap case-insensitive
+%option yyclass="UDBMS::Scanner"
+%option c++
+
 %{
 #include <string>
+#include <stdarg.h>
 
+#include "parser/statement/CreateStatement.h"
 
 #include "parser/scanner.hpp"
 #undef  YY_DECL
-#define YY_DECL int UDBMS::Scanner::yylex( UDBMS::DParse::semantic_type * const lval, UDBMS::DParse::location_type *loc )
+#define YY_DECL int UDBMS::Scanner::yylex(UDBMS::DParse::semantic_type * const lval, UDBMS::DParse::location_type *loc)
+
+#define yyterminate() return token::END;
 
 using token = UDBMS::DParse::token;
 
-/* define yyterminate as this instead of NULL */
 #define yyterminate() return( token::END )
-
-/* msvc2010 requires that we exclude this header file. */
-#define YY_NO_UNISTD_H
-
-/* update location on matching */
-#define YY_USER_ACTION loc->step(); loc->columns(yyleng);
 
 %}
 
 
-%option yyclass="UDBMS::Scanner"
-%option noyywrap
-%option c++
 
 %%
 %{          /** Code executed at the beginning of yylex **/
             yylval = lval;
 %}
 
-quit;              {return token::END ;}
 
-show                      {return token::SHOW;}
-drop                      {return token::DROP;}
-create                    {return token::CREATE;}
-table                     {return token::TABLE;}
-close                     {return token::CLOSE;}
-unique                    {return token::UNIQUE;}
-constraint                {return token::CONSTRAINT;}
-primary                   {return token::PRIMARY;}
-key                       {return token::KEY;}
-int                       {
-        yylval->build<std::string>(yytext);
-        return token::INT;
-        }
-float                     {
-        yylval->build<std::string>(yytext);
-        return token::FLOAT;
-        }
-double                    {
-        yylval->build<std::string>(yytext);
-        return token::DOUBLE;
-        }
-string                    {
-        yylval->build<std::string>(yytext);
-        return token::STRING;
-        }
+quit;              { return token::END; }
 
-(^`)[A-Za-z_][A-Za-z_0-9]*(`$)  {
-        yylval->build<std::string>(yytext);
-        return token::NAME;
-        }
-[A-Za-z_][A-Za-z_0-9]*  {
-        yylval->build<std::string>(yytext);
-        return token::NAME;
-        }
 
--?[1-9][0-9]*             {
-        yylval->build<int>() = atoi(yytext);
-        return token::NUMBER;
-        }
-\(                        {return token::RBRACKET;}
-\)                        {return token::LBRACKET;}
-,                         {return token::SEP;}
-;                         {return token::DIV;}
+INTEGER     { return token::INTEGER; }
+VARCHAR     { return token::VARCHAR; }
 
+
+SHOW        { return token::SHOW;   }
+DROP        { return token::DROP;   }
+TABLE       { return token::TABLE;  }
+CREATE      { return token::CREATE; }
+
+INSERT      { return token::INSERT; }
+SELECT      { return token::SELECT; }
+UPDATE      { return token::UPDATE; }
+DELETE      { return token::DELETE; }
+
+INTO        { return token::INTO;   }
+VALUES      { return token::VALUES; }
+FROM        { return token::FROM;   }
+WHERE       { return token::WHERE;  }
+SET         { return token::SET;    }
+GROUP       { return token::GROUP;  }
+ORDER       { return token::ORDER;  }
+BY          { return token::BY;     }
+HAVING      { return token::HAVING; }
+
+CONSTRAINT  { return token::CONSTRAINT;}
+UNIQUE      { return token::UNIQUE; }
+PRIMARY     { return token::PRIMARY; }
+KEY         { return token::KEY;    }
+NOT         { return token::NOT;    }
+NULL        { return token::NULL_y;   }
+
+
+-?[0-9]+    { yylval->build<int>() = atoi(yytext); return token::INTNUM; }
+
+-?[0-9]+"."[0-9]* |
+-?"."[0-9]+     |
+-?[0-9]+E[-+]?[0-9]+    |
+-?[0-9]+"."[0-9]*E[-+]?[0-9]+ |
+-?"."[0-9]+E[-+]?[0-9]+ { yylval->build<char*>() = (yytext); return token::APPROXNUM; }
+
+
+'(\\.|''|[^'\n])*'   |
+\"(\\.|\"\"|[^"\n])*\"  { yylval->build<char*>() = (yytext); return token::STRING; }
+
+
+[-+&~|^/%*(),.;!]   { return yytext[0]; }
+
+
+[A-Za-z][A-Za-z0-9_]*   { yylval->build<char*>() = yytext; return token::NAME; }
+`[^`/\\.\n]+`           { yylval->build<char*>() = yytext; return token::NAME; }
+
+
+TRUE    { yylval->build<bool>() = atoi(yytext); return token::BOOL; }
+FALSE   { yylval->build<bool>() = atoi(yytext); return token::BOOL; }
 %%
-
-
