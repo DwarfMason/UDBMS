@@ -36,17 +36,6 @@ public:
     * opt_limit
     * opt_into_list;
     */
-    void select(
-        std::vector<std::string> select_expr_list,
-        std::vector<std::string> name_list_expr,
-        std::vector<bool> opt_where,
-        std::vector<bool> opt_groupby,
-        std::vector<bool> opt_having,
-        std::vector<bool> opt_orderby,
-        std::vector<bool> opt_limit,
-        std::vector<bool> opt_into_list
-        );
-
 
     void create_table(CreateStatement::Statement stmt);
 
