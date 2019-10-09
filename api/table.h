@@ -16,6 +16,7 @@ public:
     [[nodiscard]] const std::vector<column> &get_columns() const;
     void set_name(std::string name);
     void set_columns(std::vector<column> cols);
+    void add_column(const column& col);
 private:
     std::string name_;
     std::vector<column> cols_;

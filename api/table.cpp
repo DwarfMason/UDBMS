@@ -29,3 +29,8 @@ void table::set_columns(std::vector<column> cols)
 {
     cols_ = std::move(cols);
 }
+
+void table::add_column(const column &col)
+{
+    cols_.push_back(col);
+}
