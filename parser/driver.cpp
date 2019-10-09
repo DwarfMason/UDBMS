@@ -17,11 +17,21 @@ void UDBMS::Driver::parse(std::istream &stream )
 {
     /*TODO*/
     try {
+
+//        std::string str;
+//        std::getline(stream, str);
+//        std::istringstream st(str);
         parse_helper(stream);
-    }catch(sql_error &e){
-        std::cerr << e.error_code_ << ":" << e.msg_ <<"\n";
+//        parse(stream);
+    }
+    catch(sql_error & e)
+    {
+        std::cerr << e.error_code_ << ":" << e.msg_ << "\n";
+        char a = std::cin.get();
+        while(a != '\n') a = std::cin.get();
         parse(stream);
     }
+
 }
 
 
@@ -126,5 +136,21 @@ void UDBMS::Driver::show_create(ShowCreateStatement::Statement stmt)
     {
         std::cerr << e.msg() << std::endl;
     }
+}
+void UDBMS::Driver::delete_stmt(DeleteStatement::Statement stmt)
+{
+
+}
+void UDBMS::Driver::update(UpdateStatement::Statement stmt)
+{
+
+}
+void UDBMS::Driver::select(SelectStatement::Statement stmt)
+{
+
+}
+void UDBMS::Driver::insert(InsertStatement::Statement stmt)
+{
+
 }
 

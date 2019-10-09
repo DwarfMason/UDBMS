@@ -1,6 +1,8 @@
-%option noyywrap case-insensitive
+%option yylineno yywrap case-insensitive
 %option yyclass="UDBMS::Scanner"
 %option c++
+%option stack
+
 
 %{
 #include <string>
@@ -14,9 +16,9 @@
 
 using token = UDBMS::DParse::token;
 
-
+#define yyterminate() return token::END
+#define YY_NO_UNISTD_H
 %}
-
 
 
 %%
@@ -30,6 +32,8 @@ quit              { return token::END; }
 
 INTEGER     { return token::INTEGER;    }
 VARCHAR     { return token::VARCHAR;    }
+CHAR        { return token::CHAR;       }
+FLOAT       { return token::FLOAT;      }
 
 
 SHOW        { return token::SHOW;       }
@@ -82,7 +86,11 @@ NULL        { return token::NULL_y;     }
     return token::NAME;
 }
 
-
 TRUE    { yylval->build<bool>() = atoi(yytext); return token::BOOL; }
 FALSE   { yylval->build<bool>() = atoi(yytext); return token::BOOL; }
 %%
+
+int yyFlexLexer::yywrap()
+{
+    return 1;
+}

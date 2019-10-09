@@ -10,6 +10,10 @@
 #include "scanner.hpp"
 #include "parser.tab.hh"
 #include <api/crud.h>
+#include <parser/statement/InsertStatement.h>
+#include <parser/statement/DeleteStatement.h>
+#include <parser/statement/SelectStatement.h>
+#include <parser/statement/UpdateStatement.h>
 #include "statement/CreateStatement.h"
 
 namespace UDBMS{
@@ -48,6 +52,11 @@ public:
     * SHOW CREATE TABLE table_name;
     */
     void show_create(ShowCreateStatement::Statement stmt);
+
+    void insert(InsertStatement::Statement stmt);
+    void delete_stmt(DeleteStatement::Statement stmt);
+    void select(SelectStatement::Statement stmt);
+    void update(UpdateStatement::Statement stmt);
     bool unique = 0;
     bool constraint = false;
 

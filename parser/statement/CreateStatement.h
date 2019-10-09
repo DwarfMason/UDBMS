@@ -15,7 +15,9 @@ struct CreateStatement : BaseStatement
 {
     enum class Type{
         INTEGER,
-        VARCHAR
+        VARCHAR,
+        CHAR,
+        FLOAT
     };
     enum flag{
         UNIQUE,

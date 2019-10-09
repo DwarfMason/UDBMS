@@ -49,6 +49,8 @@ void emit(char *s,...);
 
 %token INTEGER
 %token VARCHAR
+%token CHAR
+%token FLOAT
 
 %token SHOW
 %token DROP
@@ -120,8 +122,8 @@ void emit(char *s,...);
 %%
 
 stmt_list
-    : stmt ';'
-    | stmt '\n'
+    :
+    | stmt ';'
     | stmt_list stmt ';'
     ;
 
@@ -220,8 +222,7 @@ insert_stmt:        /*InsertStatement::Statement*/
         $$.name = $3;
         $$.cols = $5;
         $$.value = $9;
-        /*TODO USE DRIVER*/
-
+        driver.insert($$);
     }
     ;
 /*end insert*/
@@ -234,7 +235,7 @@ update_stmt:        /*UpdateStatement::Statement*/
         $$.columnName = $4;
         $$.newValue = $6;
         $$.expr = $7;
-        /*TODO USE DRIVER*/
+        driver.update($$);
     }
     ;
 
@@ -247,7 +248,7 @@ delete_stmt:            /*DeleteStatement::Statement*/
         $$ = DeleteStatement::Statement();
         $$.name = $3;
         $$.expr = $5;
-        /*TODO USE DRIVER*/
+        driver.delete_stmt($$);
     }
     ;
 
@@ -259,12 +260,12 @@ select_stmt             /*SelectStatement::Statement*/
         $$ = SelectStatement::Statement();
         $$.selector = $2;
         $$.expr = $6;
-        /*TODO USE DRIVER*/
+        driver.select($$);
     }
     | SELECT selector FROM NAME   {
               $$ = SelectStatement::Statement();
               $$.selector = $2;
-              /*TODO USE DRIVER*/
+              driver.select($$);
           }
     ;
 
@@ -287,6 +288,8 @@ name_list_expr      /*std::vector<std::string>*/
 var_type    /*Type*/
     : INTEGER   {$$ = CreateStatement::Type::INTEGER;}
     | VARCHAR   {$$ = CreateStatement::Type::VARCHAR;}
+    | CHAR      {$$ = CreateStatement::Type::CHAR;}
+    | FLOAT     {$$ = CreateStatement::Type::FLOAT;}
     ;
 
 %%
@@ -294,7 +297,6 @@ var_type    /*Type*/
 
 void UDBMS::DParse::error( const location_type &l, const std::string &err_message )
 {
-   while(std::cin.get() != ';');
    throw parser_error(err_message);
 }
 
