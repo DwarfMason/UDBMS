@@ -1,4 +1,5 @@
 #include <fstream>
+#include <exceptions.h>
 
 #include "driver.hpp"
 #include "statement/BaseStatement.h"
@@ -28,7 +29,51 @@ void UDBMS::Driver::parse_helper(std::istream &stream )
 }
 void UDBMS::Driver::create_table(CreateStatement::Statement stmt)
 {
-
+    std::clog << "DEBUG TABLE NAME : "<<stmt.tableName << std::endl;
+    try {
+        table tbl = API::create_table(stmt.tableName);
+        auto cols = stmt.columns;
+        std::map<std::string, column&> col_map;
+        for (const CreateStatement::Column& col : cols)
+        {
+            // TODO parse flags
+            auto type = static_cast<data_type>(col.type);
+            column api_col(col.name, type);
+            std::clog << "DEBUG COL NAME : " << col.name << std::endl;
+            if (col.typeLen != -1) {
+                api_col.set_size(col.typeLen);
+            }
+            tbl.add_column(api_col);
+            col_map.insert_or_assign(api_col.get_name(), api_col);
+        }
+        auto cts = stmt.constraints;
+        for (const CreateStatement::Constraint& ct : cts) {
+            // TODO Use name of the constraint
+            constraints api_cts;
+            switch (ct.constraint.type) {
+                case CreateStatement::Constraints::PRIMARY_KEY:
+                    api_cts.set_not_null(true);
+                    api_cts.set_unique(true);
+                    break;
+                case CreateStatement::Constraints::UNIQUE:
+                    api_cts.set_unique(true);
+                    break;
+                default:
+                    throw std::runtime_error("driver.cpp, Line 56");
+            }
+            for (const auto& col : ct.constraint.keys) {
+                auto current_cts = col_map.at(col).get_constraints();
+                current_cts.set_unique(current_cts.is_unique_key() || api_cts.is_unique_key());
+                current_cts.set_not_null(current_cts.is_not_null() || api_cts.is_not_null());
+                col_map.at(col).set_constraints(current_cts);
+            }
+        }
+        API::commit_table(tbl);
+        std::cout << "Table created." << std::endl;
+    }
+    catch (sql_error& e) {
+        std::cerr << e.what() << std::endl;
+    }
 }
 void UDBMS::Driver::drop_table(DropTableStatement::Statement stmt)
 {
