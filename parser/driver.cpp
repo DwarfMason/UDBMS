@@ -16,11 +16,10 @@ UDBMS::Driver::~Driver()
 void UDBMS::Driver::parse(std::istream &stream )
 {
     /*TODO*/
-    std::cout << "\33\33\33\33";
     try {
         parse_helper(stream);
     }catch(sql_error e){
-        std::cout << "\33" << e.error_code_ << ":" << e.msg_ <<"\n";
+        std::cerr << e.error_code_ << ":" << e.msg_ <<"\n";
     }
 }
 
