@@ -14,13 +14,18 @@ UDBMS::Driver::~Driver()
 
 void UDBMS::Driver::parse(std::istream &stream )
 {
-   parse_helper( stream );
+    /*TODO*/
+    std::cout << "\33\33\33\33";
+    try {
+        parse_helper(stream);
+    }catch(sql_error e){
+        std::cout << "\33" << e.error_code_ << ":" << e.msg_ <<"\n";
+    }
 }
 
 
 void UDBMS::Driver::parse_helper(std::istream &stream )
 {
-
       delete(scanner);
       scanner = new UDBMS::Scanner(&stream );
       parser = new UDBMS::DParse((*scanner) /* scanner */,

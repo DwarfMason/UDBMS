@@ -28,41 +28,41 @@ using token = UDBMS::DParse::token;
 quit;              { return token::END; }
 
 
-INTEGER     { return token::INTEGER; }
-VARCHAR     { return token::VARCHAR; }
+INTEGER     { return token::INTEGER;    }
+VARCHAR     { return token::VARCHAR;    }
 
 
-SHOW        { return token::SHOW;   }
-DROP        { return token::DROP;   }
-TABLE       { return token::TABLE;  }
-CREATE      { return token::CREATE; }
+SHOW        { return token::SHOW;       }
+DROP        { return token::DROP;       }
+TABLE       { return token::TABLE;      }
+CREATE      { return token::CREATE;     }
 
-INSERT      { return token::INSERT; }
-SELECT      { return token::SELECT; }
-UPDATE      { return token::UPDATE; }
-DELETE      { return token::DELETE; }
+INSERT      { return token::INSERT;     }
+SELECT      { return token::SELECT;     }
+UPDATE      { return token::UPDATE;     }
+DELETE      { return token::DELETE;     }
 
-INTO        { return token::INTO;   }
-VALUES      { return token::VALUES; }
-FROM        { return token::FROM;   }
-WHERE       { return token::WHERE;  }
-SET         { return token::SET;    }
-GROUP       { return token::GROUP;  }
-ORDER       { return token::ORDER;  }
-BY          { return token::BY;     }
-HAVING      { return token::HAVING; }
+INTO        { return token::INTO;       }
+VALUES      { return token::VALUES;     }
+FROM        { return token::FROM;       }
+WHERE       { return token::WHERE;      }
+SET         { return token::SET;        }
+GROUP       { return token::GROUP;      }
+ORDER       { return token::ORDER;      }
+BY          { return token::BY;         }
+HAVING      { return token::HAVING;     }
 
-CONSTRAINT  { return token::CONSTRAINT;}
-UNIQUE      { return token::UNIQUE; }
-PRIMARY     { return token::PRIMARY; }
-KEY         { return token::KEY;    }
-NOT         { return token::NOT;    }
-NULL        { return token::NULL_y;   }
+CONSTRAINT  { return token::CONSTRAINT; }
+UNIQUE      { return token::UNIQUE;     }
+PRIMARY     { return token::PRIMARY;    }
+KEY         { return token::KEY;        }
+NOT         { return token::NOT;        }
+NULL        { return token::NULL_y;     }
 
 
 -?[0-9]+    { yylval->build<int>() = atoi(yytext); return token::INTNUM; }
 
--?[0-9]+"."[0-9]* |
+-?[0-9]+"."[0-9]*       |
 -?"."[0-9]+     |
 -?[0-9]+E[-+]?[0-9]+    |
 -?[0-9]+"."[0-9]*E[-+]?[0-9]+ |

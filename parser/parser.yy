@@ -234,7 +234,7 @@ update_stmt:        /*UpdateStatement::Statement*/
 
 /*delete stmt*/
 delete_stmt:            /*DeleteStatement::Statement*/
-    : DELETE FROM NAME
+    DELETE FROM NAME
       WHERE expr              {
         $$ = DeleteStatement::Statement();
         $$.name = $3;

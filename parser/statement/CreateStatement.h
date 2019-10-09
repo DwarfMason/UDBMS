@@ -50,25 +50,26 @@ struct CreateStatement : BaseStatement
         std::vector<Constraint> constraints;
         std::string tableName;
     };
+
     static void get_str(Statement stmt){
-        std::cout << "table name: " << stmt.tableName<< '\n';
-        std::cout << "columns: " << '\n';
+        std::clog << "table name: " << stmt.tableName<< '\n';
+        std::clog << "columns: " << '\n';
         for (int i = 0; i < stmt.columns.size(); ++i) {
-            std::cout << "\tcolumn name: " << stmt.columns[i].name << "\n";
-            std::cout << "\t\tflags: " << stmt.columns[i].flags.size() << " : ";
+            std::clog << "\tcolumn name: " << stmt.columns[i].name << "\n";
+            std::clog << "\t\tflags: " << stmt.columns[i].flags.size() << " : ";
             for (int j = 0; j < stmt.columns[i].flags.size(); ++j){
-                std::cout << std::to_string(stmt.columns[i].flags[j]);
+                std::clog << std::to_string(stmt.columns[i].flags[j]);
             }
-            std::cout <<'\n';
+            std::clog <<'\n';
         }
-        std::cout << "\tconstraints: " << '\n';
+        std::clog << "\tconstraints: " << '\n';
         for (int j = 0; j < stmt.constraints.size(); ++j) {
-            std::cout << "\t\tconstraint name: " << stmt.constraints[j].name << '\n';
-            std::cout << "\t\tconstraint flags: ";
+            std::clog << "\t\tconstraint name: " << stmt.constraints[j].name << '\n';
+            std::clog << "\t\tconstraint flags: ";
             for (int k = 0; k < stmt.constraints[j].constraint.keys.size(); ++k) {
-                std::cout << " "<< stmt.constraints[j].constraint.keys[k] << " ";
+                std::clog << " "<< stmt.constraints[j].constraint.keys[k] << " ";
             }
-            std::cout <<'\n';
+            std::clog <<'\n';
         }
     }
 };
