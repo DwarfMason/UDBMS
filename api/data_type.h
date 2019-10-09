@@ -1,7 +1,14 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 #include <jsoncons/json.hpp>
+
+struct type_info
+{
+    std::string name;
+    uint64_t size;
+};
 
 enum class data_type: uint8_t
 {
@@ -10,10 +17,12 @@ enum class data_type: uint8_t
     CHAR,
 };
 
-const std::map<data_type, uint64_t> data_sizes = {
-    {data_type::INTEGER, 4},
-    {data_type::FLOAT, 4},
-    {data_type::CHAR, 1},
+#define REGISTER_TYPE(type, size) { data_type::type, { #type , size } }
+
+std::map<data_type, type_info> type_registry = {
+    REGISTER_TYPE(INTEGER, 4),
+    REGISTER_TYPE(FLOAT, 4),
+    REGISTER_TYPE(CHAR, 1),
 };
 
 JSONCONS_ENUM_TRAITS_DECL(data_type, INTEGER, FLOAT, CHAR);

@@ -1,4 +1,5 @@
 #include <fstream>
+#include <logic/show_create.h>
 #include <exceptions.h>
 
 #include "driver.hpp"
@@ -34,7 +35,6 @@ void UDBMS::Driver::parse_helper(std::istream &stream )
 }
 void UDBMS::Driver::create_table(CreateStatement::Statement stmt)
 {
-    std::clog << "DEBUG TABLE NAME : "<<stmt.tableName << std::endl;
     try {
         table tbl = API::create_table(stmt.tableName);
         auto cols = stmt.columns;
@@ -44,7 +44,6 @@ void UDBMS::Driver::create_table(CreateStatement::Statement stmt)
             // TODO parse flags
             auto type = static_cast<data_type>(col.type);
             column api_col(col.name, type);
-            std::clog << "DEBUG COL NAME : " << col.name << std::endl;
             if (col.typeLen != -1) {
                 api_col.set_size(col.typeLen);
             }
@@ -82,10 +81,28 @@ void UDBMS::Driver::create_table(CreateStatement::Statement stmt)
 }
 void UDBMS::Driver::drop_table(DropTableStatement::Statement stmt)
 {
-
+    try {
+        for (const auto& table_name : stmt.keys)
+        {
+            const table& t = API::load_table(table_name);
+            API::drop_table(t);
+        }
+    }
+    catch (sql_error& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
 }
 void UDBMS::Driver::show_create(ShowCreateStatement::Statement stmt)
 {
-
+    try
+    {
+        const auto& t = API::load_table(stmt.name);
+        Logic::show_create_table(t);
+    }
+    catch (sql_error& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
 }
 

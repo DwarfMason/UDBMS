@@ -17,6 +17,8 @@ public:
     void set_name(std::string name);
     void set_columns(std::vector<column> cols);
     void add_column(const column& col);
+    [[nodiscard]] table_data& get_data();
+    [[nodiscard]] std::string get_create_query() const;
 private:
     std::string name_;
     std::vector<column> cols_;

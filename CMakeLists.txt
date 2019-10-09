@@ -4,6 +4,7 @@ project(UDBMS)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DECHO")
 include_directories(ext/jsoncons/include)
+include_directories(ext/fmt/include)
 
 FIND_PACKAGE(FLEX)
 FIND_PACKAGE(BISON)
@@ -24,8 +25,8 @@ include_directories(
         ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(UDBMS
+        ext/fmt/src/format.cc
         main.cpp
-        engine/storage_engine.cpp engine/storage_engine.h
         api/table.cpp api/table.h
         api/column.cpp api/column.h
         api/constraints.cpp api/constraints.h
@@ -35,10 +36,18 @@ add_executable(UDBMS
         ${FLEX_flexer_OUTPUTS}
         ${BISON_bison_parser_OUTPUTS}
         api/crud.cpp api/crud.h
-        constants.h engine/table_data.cpp engine/table_data.h
+        constants.h
+        engine/table_data.cpp engine/table_data.h
         parser/statement/BaseStatement.h
         parser/statement/CreateStatement.h
         parser/statement/ShowCreateStatement.h
-        parser/statement/DropTableStatement.h api/cursor.cpp api/cursor.h parser/statement/InsertStatement.h parser/statement/UpdateStatement.h parser/statement/DeleteStatement.h parser/statement/SelectStatement.h)
+        parser/statement/DropTableStatement.h
+        api/cursor.cpp api/cursor.h
+        parser/statement/InsertStatement.h
+        parser/statement/UpdateStatement.h
+        parser/statement/DeleteStatement.h
+        parser/statement/SelectStatement.h
+        api/row.cpp api/row.h
+        logic/show_create.cpp logic/show_create.h)
 
 target_link_libraries(UDBMS INTERFACE stdc++fs)
