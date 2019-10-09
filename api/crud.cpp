@@ -9,8 +9,6 @@ namespace fs = std::filesystem;
 
 table API::create_table(const std::string &name)
 {
-    // TODO: create data file too (ENGINE section)
-
     auto meta_filename = name + METADATA_EXT;
     fs::path metadata_path(DATA_PATH / meta_filename);
 
