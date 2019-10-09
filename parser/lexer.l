@@ -12,11 +12,8 @@
 #undef  YY_DECL
 #define YY_DECL int UDBMS::Scanner::yylex(UDBMS::DParse::semantic_type * const lval, UDBMS::DParse::location_type *loc)
 
-#define yyterminate() return token::END;
-
 using token = UDBMS::DParse::token;
 
-#define yyterminate() return( token::END )
 
 %}
 
@@ -69,18 +66,18 @@ NULL        { return token::NULL_y;   }
 -?"."[0-9]+     |
 -?[0-9]+E[-+]?[0-9]+    |
 -?[0-9]+"."[0-9]*E[-+]?[0-9]+ |
--?"."[0-9]+E[-+]?[0-9]+ { yylval->build<char*>() = (yytext); return token::APPROXNUM; }
+-?"."[0-9]+E[-+]?[0-9]+ { yylval->build<std::string>(yytext); return token::APPROXNUM; }
 
 
 '(\\.|''|[^'\n])*'   |
-\"(\\.|\"\"|[^"\n])*\"  { yylval->build<char*>() = (yytext); return token::STRING; }
+\"(\\.|\"\"|[^"\n])*\"  { yylval->build<std::string>(yytext); return token::STRING; }
 
 
 [-+&~|^/%*(),.;!]   { return yytext[0]; }
 =                   { return yytext[0]; }
 
-[A-Za-z][A-Za-z0-9_]*               { yylval->build<char*>() = yytext; return token::NAME; }
-`[^`/\\.\n]+`         { yylval->build<char*>() = yytext; return token::NAME; }
+[A-Za-z][A-Za-z0-9_]* { yylval->build<std::string>(yytext); return token::NAME; }
+`[^`/\\.\n]+`         { yylval->build<std::string>(yytext); return token::NAME; }
 
 
 TRUE    { yylval->build<bool>() = atoi(yytext); return token::BOOL; }

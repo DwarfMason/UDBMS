@@ -77,9 +77,9 @@ void emit(char *s,...);
 
 %token<int> INTNUM
 %token<float> APPROXNUM
-%token<char*> STRING
+%token<std::string> STRING
 %token<bool> BOOL
-%token<char*> NAME
+%token<std::string> NAME
 
 
 %locations
@@ -131,8 +131,7 @@ stmt
 
 /*create Table*/
 create_stmt:
-    CREATE TABLE NAME '('
-    create_params ')' {$5.tableName = $3; driver.create_table($5);}
+    CREATE TABLE NAME '(' create_params ')' {$5.tableName = $3;CreateStatement::get_str($5);driver.create_table($5);}
     ;
 
 create_params               /*Statement*/

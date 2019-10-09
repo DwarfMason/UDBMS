@@ -27,7 +27,7 @@ public:
    int yylex(UDBMS::DParse::semantic_type * const lval,
              UDBMS::DParse::location_type *location );
    // YY_DECL defined in lexer.l
-   // Method body created by flex in mc_lexer.yy.cc
+   // Method body created by flex in mc_lexer.yz
 
 private:
    /* yyval ptr */

@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 #include "BaseStatement.h"
 
 struct CreateStatement : BaseStatement
@@ -49,6 +50,13 @@ struct CreateStatement : BaseStatement
         std::vector<Constraint> constraints;
         std::string tableName;
     };
+    static void get_str(Statement stmt){
+        std::cout << "table name: " << stmt.tableName<< '\n';
+        std::cout << "columns: " << '\n';
+        for (int i = 0; i < stmt.columns.size(); ++i) {
+            std::cout << "column name: " << stmt.columns[i].name << "\n";
+        }
+    }
 };
 
 
