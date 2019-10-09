@@ -29,12 +29,11 @@ while read LINE; do
 		ok_cnt=$(( $ok_cnt + 1 )) 
 		echo 'Test' "$str_cnt" 'passed' >> report
 	else
-		echo '---------------------------------' >> report
     	echo 'Test' "$str_cnt" 'failed' >> report
     	echo 'Expected:' $LINE $'\n''Got:' $res_ok '/' $res_err >> report
     	echo '---------------------------------' >> report
 	fi
-	echo "${LINE:0:2}"
+	
 	if [ "${LINE:0:2}" == "* " ]
 		then 
 			$res_ok_num=$(( $res_ok_num + 1 ))
