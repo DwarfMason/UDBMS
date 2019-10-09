@@ -25,7 +25,7 @@ using token = UDBMS::DParse::token;
 %}
 
 
-quit;              { return token::END; }
+quit              { return token::END; }
 
 
 INTEGER     { return token::INTEGER;    }

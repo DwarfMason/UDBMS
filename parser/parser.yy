@@ -126,6 +126,7 @@ stmt
     : create_stmt
     | show_create
     | drop_table_stmt
+    | END {exit(0);}
     ;
 
 
