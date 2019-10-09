@@ -234,8 +234,8 @@ update_stmt:        /*UpdateStatement::Statement*/
 
 /*delete stmt*/
 delete_stmt:            /*DeleteStatement::Statement*/
-    DELETE FROM NAME
-    WHERE expr              {
+    : DELETE FROM NAME
+      WHERE expr              {
         $$ = DeleteStatement::Statement();
         $$.name = $3;
         $$.expr = $5;
@@ -246,13 +246,18 @@ delete_stmt:            /*DeleteStatement::Statement*/
 /*end delete stmt*/
 
 /*select expr*/
-select_stmt:            /*SelectStatement::Statement*/
-    SELECT selector FROM NAME WHERE expr    {
+select_stmt             /*SelectStatement::Statement*/
+    : SELECT selector FROM NAME WHERE expr    {
         $$ = SelectStatement::Statement();
         $$.selector = $2;
         $$.expr = $6;
         /*TODO USE DRIVER*/
     }
+    | SELECT selector FROM NAME   {
+              $$ = SelectStatement::Statement();
+              $$.selector = $2;
+              /*TODO USE DRIVER*/
+          }
     ;
 
 selector    /*std::vector<std::string> */
