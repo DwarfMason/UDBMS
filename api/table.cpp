@@ -66,12 +66,20 @@ std::string table::get_create_query() const
         if (i < cols_.size()-1)
             constraint_args << ",";
 
+        std::string cts_str = constraint_args.str();
+
+        std::string type_str = type_registry.at(col.get_type()).name;
+        if (col.get_size() > 0)
+        {
+            type_str += "(" + std::to_string(col.get_size()) + ")";
+        }
+
         create_args << fmt::format(arg_tpl,
             col.get_name(),
-            type_registry.at(col.get_type()).name,
-            constraint_args.str()
+            type_str,
+            cts_str
         );
-        constraint_args.clear();
+        constraint_args.str("");
     }
     return fmt::format(sql_query_tpl,
         name_,
