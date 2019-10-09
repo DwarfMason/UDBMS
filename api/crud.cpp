@@ -28,8 +28,6 @@ table API::create_table(const std::string &name)
 
 table API::load_table(const std::string &name)
 {
-    // TODO: implement data file loading
-
     auto meta_filename = name + METADATA_EXT;
     fs::path metadata_path(DATA_PATH / meta_filename);
 
@@ -46,16 +44,17 @@ table API::load_table(const std::string &name)
 
 void API::drop_table(const table &tbl)
 {
-    // TODO: delete table data too
-
     auto meta_filename = tbl.get_name() + METADATA_EXT;
+    auto data_filename = tbl.get_name() + STORAGE_EXT;
     fs::path metadata_path(DATA_PATH / meta_filename);
+    fs::path storage_path(DATA_PATH / data_filename);
 
     if (!fs::remove(metadata_path))
         throw table_not_exist_error();
+    fs::remove(data_filename);
 }
 
-void API::commit_table(const table &tbl)
+void API::commit_table(table &tbl)
 {
     // TODO #1: save data on commit
     // TODO #2: think about marking some chunks as "dirty" and write only them
@@ -67,6 +66,8 @@ void API::commit_table(const table &tbl)
         jsoncons::json json(tbl);
         std::ofstream file(metadata_path);
         file << jsoncons::pretty_print(json);
+        tbl.get_data().purge();
+        // TODO write data
     }
     else
         throw table_not_exist_error();
