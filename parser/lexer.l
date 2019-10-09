@@ -77,7 +77,10 @@ NULL        { return token::NULL_y;   }
 =                   { return yytext[0]; }
 
 [A-Za-z][A-Za-z0-9_]* { yylval->build<std::string>(yytext); return token::NAME; }
-`[^`/\\.\n]+`         { yylval->build<std::string>(yytext); return token::NAME; }
+`[^`/\\.\n]+`         { std::string temp(yytext);
+    yylval->build<std::string>(temp.substr(1,temp.size()-2));
+    return token::NAME;
+}
 
 
 TRUE    { yylval->build<bool>() = atoi(yytext); return token::BOOL; }

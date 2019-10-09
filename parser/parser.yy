@@ -145,7 +145,9 @@ params_expr                 /*std::vector<Column>*/
     ;
 
 create_single_param         /*Column*/
-    : NAME var_type param_flags                 {$$ = CreateStatement::Column();$$.name = $1; $$.type = $2; $$.flags = $3;}
+    : NAME var_type                             {$$ = CreateStatement::Column();$$.name = $1;$$.type = $2;}
+    | NAME var_type '(' INTNUM ')'              {$$ = CreateStatement::Column();$$.name = $1;$$.type = $2; $$.typeLen = $4;}
+    | NAME var_type param_flags                 {$$ = CreateStatement::Column();$$.name = $1; $$.type = $2; $$.flags = $3;}
     | NAME var_type '(' INTNUM ')' param_flags  {$$ = CreateStatement::Column();$$.name = $1; $$.type = $2; $$.typeLen = $4; $$.flags = $6;}
     ;
 
@@ -154,8 +156,7 @@ param_flags                 /*std::vector<int>*/
     | param_flags create_flag   {$$ = $1; $$.push_back($2);}
 
 create_flag                 /*int*/
-    :
-    | UNIQUE            {$$ = CreateStatement::UNIQUE;}
+    : UNIQUE            {$$ = CreateStatement::UNIQUE;}
     | PRIMARY KEY       {$$ = CreateStatement::PRIMARY;}
     | NOT NULL_y          {$$ = CreateStatement::NOT_NULL;}
     ;
