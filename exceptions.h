@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <stdexcept>
+#include <sstream>
 
 struct sql_error : public std::runtime_error
 {
@@ -11,9 +12,12 @@ struct sql_error : public std::runtime_error
         error_code_ = errcode;
         msg_ = msg;
     }
-    [[nodiscard]] const char* what() const noexcept final
+    [[nodiscard]] std::string msg() const noexcept
     {
-        return ("Error " + std::to_string(error_code_) + ": " + msg_).c_str();
+        std::stringstream ss;
+        ss << "Error " << std::to_string(error_code_) << ": " << msg_;
+        const auto tmp = ss.str();
+        return tmp;
     }
     uint16_t error_code_ = 0;
     std::string msg_;

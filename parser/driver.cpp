@@ -97,7 +97,7 @@ void UDBMS::Driver::create_table(CreateStatement::Statement stmt)
         std::cout << "Table created." << std::endl;
     }
     catch (sql_error& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.msg() << std::endl;
     }
 }
 void UDBMS::Driver::drop_table(DropTableStatement::Statement stmt)
@@ -111,7 +111,7 @@ void UDBMS::Driver::drop_table(DropTableStatement::Statement stmt)
     }
     catch (sql_error& e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.msg() << std::endl;
     }
 }
 void UDBMS::Driver::show_create(ShowCreateStatement::Statement stmt)
@@ -123,7 +123,7 @@ void UDBMS::Driver::show_create(ShowCreateStatement::Statement stmt)
     }
     catch (sql_error& e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.msg() << std::endl;
     }
 }
 
