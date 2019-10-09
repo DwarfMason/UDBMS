@@ -35,12 +35,13 @@ while read LINE; do
     	echo '---------------------------------' >> report
 	fi
 	echo "${LINE:0:2}"
-	#if [ "${LINE:0:2}" == "* " ]
-	#	then 
-	#		$res_ok_num=$(( $res_ok_num + 1 ))
-	#	else
-	#		$res_err_num=$(( $res_err_num + 1 ))
-		fi
+	if [ "${LINE:0:2}" == "* " ]
+		then 
+			$res_ok_num=$(( $res_ok_num + 1 ))
+		else
+			$res_err_num=$(( $res_err_num + 1 ))
+	fi
+	
 	str_cnt=$(( $str_cnt + 1 ))
 done < ../tests/Create_table_sol
 
