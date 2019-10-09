@@ -18,8 +18,9 @@ void UDBMS::Driver::parse(std::istream &stream )
     /*TODO*/
     try {
         parse_helper(stream);
-    }catch(sql_error e){
+    }catch(sql_error &e){
         std::cerr << e.error_code_ << ":" << e.msg_ <<"\n";
+        parse(stream);
     }
 }
 

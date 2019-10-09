@@ -16,6 +16,9 @@
     #include "parser/statement/InsertStatement.h"
     #include "parser/statement/SelectStatement.h"
     #include "parser/statement/UpdateStatement.h"
+
+    #include "exceptions.h"
+
    namespace UDBMS {
       class Driver;
       class Scanner;
@@ -126,13 +129,17 @@ stmt
     : create_stmt
     | show_create
     | drop_table_stmt
+    | select_stmt
+    | update_stmt
+    | insert_stmt
+    | delete_stmt
     | END {exit(0);}
     ;
 
 
 /*create Table*/
 create_stmt:
-    CREATE TABLE NAME '(' create_params ')' {$5.tableName = $3;CreateStatement::get_str($5);driver.create_table($5);}
+    CREATE TABLE NAME '(' create_params ')' {$5.tableName = $3;driver.create_table($5);}
     ;
 
 create_params               /*Statement*/
@@ -212,7 +219,7 @@ insert_stmt:        /*InsertStatement::Statement*/
         $$ = InsertStatement::Statement();
         $$.name = $3;
         $$.cols = $5;
-        $$.vaule = $9;
+        $$.value = $9;
         /*TODO USE DRIVER*/
 
     }
@@ -287,9 +294,8 @@ var_type    /*Type*/
 
 void UDBMS::DParse::error( const location_type &l, const std::string &err_message )
 {
-   std::cerr << "Error: " << err_message << " at " << l << "\n";
    while(std::cin.get() != ';');
-   driver.parse( std::cin );
+   throw parser_error(err_message);
 }
 
 void

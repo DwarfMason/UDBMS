@@ -30,6 +30,13 @@ struct table_not_exist_error: public sql_error
     {}
 };
 
+struct parser_error: public sql_error
+{
+    parser_error(std::string err)
+        : sql_error(200, err)
+    {}
+};
+
 struct table_exist_error: public sql_error
 {
     table_exist_error()
