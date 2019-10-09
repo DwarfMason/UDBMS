@@ -17,12 +17,8 @@ enum class data_type: uint8_t
     CHAR,
 };
 
-#define REGISTER_TYPE(type, size) { data_type::type, { #type , size } }
+#define REGISTER_TYPE(type, size) { data_type::type, { (#type) , (size) } }
 
-std::map<data_type, type_info> type_registry = {
-    REGISTER_TYPE(INTEGER, 4),
-    REGISTER_TYPE(FLOAT, 4),
-    REGISTER_TYPE(CHAR, 1),
-};
+extern std::map<data_type, type_info> type_registry;
 
 JSONCONS_ENUM_TRAITS_DECL(data_type, INTEGER, FLOAT, CHAR);

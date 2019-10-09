@@ -39,7 +39,7 @@ void table_data::push_row(uint64_t row_size)
 {
     std::fstream data_file_(storage_path_, FSTREAM_DATA_MODE);
     data_file_.seekp(0, std::ios_base::end);
-    std::shared_ptr<char> nulled = std::make_shared<char>(row_size, 0);
+    std::shared_ptr<char> nulled(new char[row_size](), std::default_delete<char[]>());
     data_file_.write(nulled.get(), row_size);
 
     ++row_count_;
