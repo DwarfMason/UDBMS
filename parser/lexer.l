@@ -2,8 +2,6 @@
 %option yyclass="UDBMS::Scanner"
 %option c++
 %option stack
-
-
 %{
 #include <string>
 #include <stdarg.h>
@@ -63,8 +61,9 @@ KEY         { return token::KEY;        }
 NOT         { return token::NOT;        }
 NULL        { return token::NULL_y;     }
 
+(\/\*)[^(\*\/)]*(\*\/) {}
 
--?[0-9]+    { yylval->build<int>() = atoi(yytext); return token::INTNUM; }
+-?[0-9]+    { yylval->build<std::string>(yytext); return token::INTNUM; }
 
 -?[0-9]+"."[0-9]*       |
 -?"."[0-9]+     |
@@ -80,14 +79,15 @@ NULL        { return token::NULL_y;     }
 [-+&~|^/%*(),.;!]   { return yytext[0]; }
 =                   { return yytext[0]; }
 
+TRUE    { yylval->build<std::string>(yytext); return token::BOOL; }
+FALSE   { yylval->build<std::string>(yytext); return token::BOOL; }
+
 [A-Za-z][A-Za-z0-9_]* { yylval->build<std::string>(yytext); return token::NAME; }
 `[^`/\\.\n]+`         { std::string temp(yytext);
     yylval->build<std::string>(temp.substr(1,temp.size()-2));
     return token::NAME;
 }
 
-TRUE    { yylval->build<bool>() = atoi(yytext); return token::BOOL; }
-FALSE   { yylval->build<bool>() = atoi(yytext); return token::BOOL; }
 %%
 
 int yyFlexLexer::yywrap()
