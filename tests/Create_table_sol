@@ -1,0 +1,18 @@
+200:syntax error, unexpected ')', expecting NAME
+= Table created.
+= *************************** 1. row ***************************
+=        Table: b
+= Create Table: CREATE TABLE `b` (
+=   `a` INTEGER
+= );
+= Table created.
+Error 101: Table does already exist
+= *************************** 1. row ***************************
+=        Table: a
+= Create Table: CREATE TABLE `a` (
+=   `a` INTEGER(40) UNIQUE,
+=   `b` INTEGER,
+=   `c` INTEGER
+= );
+Error 100: Table does not exist
+Error 100: Table does not exist

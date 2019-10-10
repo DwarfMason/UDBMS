@@ -1,6 +1,10 @@
-create table a();
+create table a( a integer );
 create tble a();
 create table a;
 drp table a;
 drop table a;
+create table b( b integer(40) UNIQUE );
+drop table b;
+create table create_table( b integer );
+drop table create_table;
 quit;
