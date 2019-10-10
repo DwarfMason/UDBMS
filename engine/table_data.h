@@ -12,6 +12,7 @@ class table_data
 public:
     table_data() = default;
     table_data(const std::string& name);
+    std::shared_ptr<void> read_some(size_t offset, uint64_t size);
     std::shared_ptr<void> read_value(size_t offset, data_type type);
     void write_value(size_t offset, data_type type, const std::shared_ptr<void>& value);
     void push_row(uint64_t row_size);
