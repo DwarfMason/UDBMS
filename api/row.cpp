@@ -8,16 +8,25 @@ row::row(const std::vector<uint64_t> &sizes)
         row_size += size;
     }
 }
-std::shared_ptr<void> row::at(size_t index)
+void* row::at(size_t index)
 {
+    if (data_ == nullptr)
+    {
+        throw std::runtime_error("No data in row");
+    }
     if (index < 0 and index >= sizes_.size())
     {
         throw std::runtime_error("Bad column index");
     }
-    throw std::runtime_error("mda");
+    //throw std::runtime_error("mda");
+    return static_cast<char*>(data_) + offsets_[index];
     //return std::make_shared<char>(reinterpret_cast<char*>(data_.get()) + offsets_[index]);
 }
-void row::set_data(std::shared_ptr<void> &&data)
+void row::set_data(void* data)
 {
     data_ = data;
+}
+row::~row()
+{
+    delete static_cast<char*>(data_);
 }

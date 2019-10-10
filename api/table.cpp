@@ -98,7 +98,7 @@ std::string table::get_create_query() const
     );
 }
 
-void table::insert_row(const std::map<std::string, std::shared_ptr<void>>& data)
+void table::insert_row(const std::map<std::string, void*>& data)
 {
     auto& row = rows_.emplace_back(sizes_);
     uint64_t row_size = 0;
@@ -106,14 +106,14 @@ void table::insert_row(const std::map<std::string, std::shared_ptr<void>>& data)
     {
         row_size += s;
     }
-    row.set_data(std::shared_ptr<char>(new char[row_size], std::default_delete<char[]>()));
+    row.set_data(new char[row_size]);
     for (const auto& kv : data) {
         auto cell = row.at(col_index[kv.first]);
-        memcpy(cell.get(), kv.second.get(),
+        memcpy(cell, kv.second,
             type_registry.at(cols_[col_index[kv.first]].get_type()).size);
     }
 }
-void table::delete_row(const std::string &col_name, const std::shared_ptr<void>& val)
+void table::delete_row(const std::string &col_name, const void* val)
 {
     auto row = find_first(col_name, val);
     rows_.erase(row);
@@ -140,12 +140,12 @@ void table::load_data()
         x.set_data(data_.read_some(offset += row_size, row_size));
     }
 }
-std::vector<row>::iterator table::find_first(const std::string &col_name, const std::shared_ptr<void> &val)
+std::vector<row>::iterator table::find_first(const std::string &col_name, const void* val)
 {
     return find_next(col_name, val, rows_.begin());
 }
 
-std::vector<row>::iterator table::find_next(const std::string &col_name, const std::shared_ptr<void> &val,
+std::vector<row>::iterator table::find_next(const std::string &col_name, const void* val,
     std::vector<row>::iterator start)
 {
     size_t col_i = col_index[col_name];
@@ -153,10 +153,27 @@ std::vector<row>::iterator table::find_next(const std::string &col_name, const s
 
     for (auto it = start; it != rows_.end(); ++it)
     {
-        if (!memcmp(it->at(col_i).get(), val.get(), col_s))
+        if (!memcmp(it->at(col_i), val, col_s))
         {
             return it;
         }
     }
     throw select_no_matches_error();
+}
+void table::set_cell_values(row& r, const std::map<std::string, void*>& kv)
+{
+    uint64_t row_size = 0;
+    for (uint64_t s : sizes_)
+    {
+        row_size += s;
+    }
+    for (const auto& elem : kv) {
+        auto cell = r.at(col_index[elem.first]);
+        memcpy(cell, elem.second,
+            type_registry.at(cols_[col_index[elem.first]].get_type()).size);
+    }
+}
+void table::delete_row(std::vector<row>::iterator pos)
+{
+    rows_.erase(pos);
 }

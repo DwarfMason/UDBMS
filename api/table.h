@@ -22,10 +22,12 @@ public:
     [[nodiscard]] std::vector<row>& get_rows();
     [[nodiscard]] std::string get_create_query() const;
     void load_data();
-    void insert_row(const std::map<std::string, std::shared_ptr<void>>& data);
-    void delete_row(const std::string& col_name, const std::shared_ptr<void>& val); // EQUALS only
-    std::vector<row>::iterator find_first(const std::string& col_name, const std::shared_ptr<void>& val);
-    std::vector<row>::iterator find_next(const std::string& col_name, const std::shared_ptr<void>& val,
+    void insert_row(const std::map<std::string, void*>& data);
+    void delete_row(const std::string& col_name, const void* val); // EQUALS only
+    void delete_row(std::vector<row>::iterator pos);
+    void set_cell_values(row& r, const std::map<std::string, void*>& kv);
+    std::vector<row>::iterator find_first(const std::string& col_name, const void* val);
+    std::vector<row>::iterator find_next(const std::string& col_name, const void* val,
         std::vector<row>::iterator start);
 private:
     std::string name_;

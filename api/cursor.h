@@ -5,11 +5,11 @@
 class cursor
 {
 public:
-    explicit cursor(table& t);
-    //next
-    //update
-    //delete
+    explicit cursor(const table& t);
+    row next();
+    void update(const std::map<std::string, void*>& kv);
+    void remove();
 private:
-    //table& tbl_;
+    table tbl_;
     std::vector<row>::iterator pos_;
 };

@@ -50,3 +50,10 @@ struct select_no_matches_error: public sql_error
         : sql_error(300, "No matches found")
     {}
 };
+
+struct cursor_eof_error: public sql_error
+{
+    cursor_eof_error()
+        : sql_error(301, "Cursor has reached the end")
+    {}
+};
