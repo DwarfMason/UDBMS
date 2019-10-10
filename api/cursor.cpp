@@ -23,5 +23,8 @@ void cursor::update(const std::map<std::string, void *> &kv)
 
 void cursor::remove()
 {
-    tbl_.delete_row(pos_);
+    if (pos_ != tbl_.get_rows().end())
+        tbl_.delete_row(pos_);
+    else
+        throw cursor_eof_error();
 }

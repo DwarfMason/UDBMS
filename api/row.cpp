@@ -30,3 +30,7 @@ row::~row()
 {
     delete static_cast<char*>(data_);
 }
+void *row::get_data()
+{
+    return data_;
+}

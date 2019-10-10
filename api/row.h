@@ -8,6 +8,7 @@ class row
 public:
     explicit row(const std::vector<uint64_t>& sizes);
     ~row();
+    void* get_data();
     void set_data(void* data);
     void* at(size_t index);
 

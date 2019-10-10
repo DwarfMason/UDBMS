@@ -65,7 +65,16 @@ void API::commit_table(table &tbl)
         file << jsoncons::pretty_print(json);
         tbl.get_data().purge();
         auto a = tbl.get_rows();
-
+        uint64_t row_size = 0;
+        size_t offset = sizeof(uint64_t);
+        for (const auto& c : tbl.get_columns()) {
+            row_size += c.get_size();
+        }
+        for (row& r : a)
+        {
+            tbl.get_data().push_row(row_size);
+            tbl.get_data().write_some(offset += row_size, row_size, r.get_data());
+        }
     }
     else
         throw table_not_exist_error();

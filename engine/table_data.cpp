@@ -20,10 +20,7 @@ void* table_data::read_value(size_t offset, data_type type)
 
 void table_data::write_value(size_t offset, data_type type, void* value)
 {
-    std::fstream data_file_(storage_path_, FSTREAM_DATA_MODE);
-    uint64_t size = type_registry.at(type).size;
-    data_file_.seekp(offset, std::ios_base::beg);
-    data_file_.write(static_cast<char*>(value), size);
+    write_some(offset, type_registry.at(type).size, value);
 }
 
 void table_data::check_requirements_()
@@ -62,4 +59,10 @@ void* table_data::read_some(size_t offset, uint64_t size)
     data_file_.seekg(offset, std::ios_base::beg);
     data_file_.readsome(value, size);
     return value;
+}
+void table_data::write_some(size_t offset, uint64_t size, void* value)
+{
+    std::fstream data_file_(storage_path_, FSTREAM_DATA_MODE);
+    data_file_.seekp(offset, std::ios_base::beg);
+    data_file_.write(static_cast<char*>(value), size);
 }

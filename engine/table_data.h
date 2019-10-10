@@ -13,6 +13,7 @@ public:
     table_data() = default;
     table_data(const std::string& name);
     void* read_some(size_t offset, uint64_t size);
+    void write_some(size_t offset, uint64_t size, void* value);
     void* read_value(size_t offset, data_type type);
     void write_value(size_t offset, data_type type, void* value);
     void push_row(uint64_t row_size);
