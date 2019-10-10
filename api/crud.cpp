@@ -39,7 +39,6 @@ table API::load_table(const std::string &name)
         throw table_not_exist_error();
 }
 
-
 void API::drop_table(const table &tbl)
 {
     auto meta_filename = tbl.get_name() + METADATA_EXT;
@@ -65,7 +64,8 @@ void API::commit_table(table &tbl)
         std::ofstream file(metadata_path);
         file << jsoncons::pretty_print(json);
         tbl.get_data().purge();
-        // TODO write data
+        auto a = tbl.get_rows();
+
     }
     else
         throw table_not_exist_error();

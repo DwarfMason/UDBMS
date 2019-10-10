@@ -15,12 +15,7 @@ table_data::table_data(const std::string &name)
 
 std::shared_ptr<void> table_data::read_value(size_t offset, data_type type)
 {
-    std::fstream data_file_(storage_path_, FSTREAM_DATA_MODE);
-    uint64_t size = type_registry.at(type).size;
-    auto value = std::make_shared<char>(size);
-    data_file_.seekg(offset, std::ios_base::beg);
-    data_file_.readsome(value.get(), size);
-    return value;
+    return read_some(offset, type_registry.at(type).size);
 }
 
 void table_data::write_value(size_t offset, data_type type, const std::shared_ptr<void>& value)
@@ -59,4 +54,12 @@ void table_data::purge()
     row_count_ = 0;
     std::fstream f(storage_path_, FSTREAM_DATA_MODE | std::fstream::trunc);
     update_row_count_(f);
+}
+std::shared_ptr<void> table_data::read_some(size_t offset, uint64_t size)
+{
+    std::fstream data_file_(storage_path_, FSTREAM_DATA_MODE);
+    auto value = std::shared_ptr<char>(new char[size](), std::default_delete<char[]>());
+    data_file_.seekg(offset, std::ios_base::beg);
+    data_file_.readsome(value.get(), size);
+    return value;
 }

@@ -291,7 +291,6 @@ name_list_expr      /*std::vector<std::string>*/
 
 var_type    /*Type*/
     : INTEGER   {$$ = CreateStatement::Type::INTEGER;}
-    | VARCHAR   {$$ = CreateStatement::Type::VARCHAR;}
     | CHAR      {$$ = CreateStatement::Type::CHAR;}
     | FLOAT     {$$ = CreateStatement::Type::FLOAT;}
     ;

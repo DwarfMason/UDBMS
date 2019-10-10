@@ -17,7 +17,6 @@ void UDBMS::Driver::parse(std::istream &stream )
 {
     /*TODO*/
     try {
-
         parse_helper(stream);
     }
     catch(sql_error & e)

@@ -44,3 +44,9 @@ struct table_exist_error: public sql_error
     {}
 };
 
+struct select_no_matches_error: public sql_error
+{
+    select_no_matches_error()
+        : sql_error(300, "No matches found")
+    {}
+};

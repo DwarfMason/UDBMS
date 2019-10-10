@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <fmt/format.h>
+#include <exceptions.h>
 
 table::table(const std::string& name)
 {
@@ -30,11 +31,21 @@ const std::vector<column>& table::get_columns() const
 void table::set_columns(std::vector<column> cols)
 {
     cols_ = std::move(cols);
+    sizes_.clear();
+    col_index.clear();
+    for (size_t i = 0; i < cols_.size(); ++i)
+    {
+        const column& col = cols_[i];
+        sizes_.push_back(col.get_size());
+        col_index.insert_or_assign(col.get_name(), i);
+    }
 }
 
 void table::add_column(const column &col)
 {
     cols_.push_back(col);
+    col_index.insert_or_assign(col.get_name(), sizes_.size());
+    sizes_.push_back(col.get_size());
 }
 table_data &table::get_data()
 {
@@ -85,4 +96,67 @@ std::string table::get_create_query() const
         name_,
         create_args.str()
     );
+}
+
+void table::insert_row(const std::map<std::string, std::shared_ptr<void>>& data)
+{
+    auto& row = rows_.emplace_back(sizes_);
+    uint64_t row_size = 0;
+    for (uint64_t s : sizes_)
+    {
+        row_size += s;
+    }
+    row.set_data(std::shared_ptr<char>(new char[row_size], std::default_delete<char[]>()));
+    for (const auto& kv : data) {
+        auto cell = row.at(col_index[kv.first]);
+        memcpy(cell.get(), kv.second.get(),
+            type_registry.at(cols_[col_index[kv.first]].get_type()).size);
+    }
+}
+void table::delete_row(const std::string &col_name, const std::shared_ptr<void>& val)
+{
+    auto row = find_first(col_name, val);
+    rows_.erase(row);
+}
+
+std::vector<row> &table::get_rows()
+{
+    return rows_;
+}
+
+void table::load_data()
+{
+    uint64_t row_cnt = data_.get_row_count();
+    uint64_t offset = sizeof(row_cnt);
+    uint64_t row_size = 0;
+    for (uint64_t s : sizes_)
+    {
+        row_size += s;
+    }
+
+    for (uint64_t curr_row = 0; curr_row < row_cnt; ++row_cnt)
+    {
+        auto& x = rows_.emplace_back(sizes_);
+        x.set_data(data_.read_some(offset += row_size, row_size));
+    }
+}
+std::vector<row>::iterator table::find_first(const std::string &col_name, const std::shared_ptr<void> &val)
+{
+    return find_next(col_name, val, rows_.begin());
+}
+
+std::vector<row>::iterator table::find_next(const std::string &col_name, const std::shared_ptr<void> &val,
+    std::vector<row>::iterator start)
+{
+    size_t col_i = col_index[col_name];
+    uint64_t col_s = type_registry.at(cols_[col_i].get_type()).size;
+
+    for (auto it = start; it != rows_.end(); ++it)
+    {
+        if (!memcmp(it->at(col_i).get(), val.get(), col_s))
+        {
+            return it;
+        }
+    }
+    throw select_no_matches_error();
 }

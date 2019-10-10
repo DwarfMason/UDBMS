@@ -1,6 +1,11 @@
 create table a();
-create table b( a int, b float);
-create table a();
-create table c(a int unique, b float, a int);
-create table d(a int);
+create table b( a integer);
+show create table b;
+drop table b;
+create table a( a integer(40) UNIQUE, b integer, c integer );
+create table a( a integer );
+show create table a;
+drop table a;
+drop table a;
+show create table a;
 quit;
