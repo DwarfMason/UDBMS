@@ -58,7 +58,7 @@ void table_data::purge()
 std::shared_ptr<void> table_data::read_some(size_t offset, uint64_t size)
 {
     std::fstream data_file_(storage_path_, FSTREAM_DATA_MODE);
-    auto value = std::make_shared<char>(new char[size](), std::default_delete<char[]>());
+    auto value = std::shared_ptr<char>(new char[size](), std::default_delete<char[]>());
     data_file_.seekg(offset, std::ios_base::beg);
     data_file_.readsome(value.get(), size);
     return value;

@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <fmt/format.h>
+#include <exceptions.h>
 
 table::table(const std::string& name)
 {
@@ -105,7 +106,7 @@ void table::insert_row(const std::map<std::string, std::shared_ptr<void>>& data)
     {
         row_size += s;
     }
-    row.set_data(std::make_shared<char>(new char[row_size], std::default_delete<char[]>()));
+    row.set_data(std::shared_ptr<char>(new char[row_size], std::default_delete<char[]>()));
     for (const auto& kv : data) {
         auto cell = row.at(col_index[kv.first]);
         memcpy(cell.get(), kv.second.get(),
@@ -114,22 +115,10 @@ void table::insert_row(const std::map<std::string, std::shared_ptr<void>>& data)
 }
 void table::delete_row(const std::string &col_name, const std::shared_ptr<void>& val)
 {
-    size_t row_i = find_row(col_name, val);
-    rows_.erase(rows_.begin() + row_i);
+    auto row = find_first(col_name, val);
+    rows_.erase(row);
 }
-size_t table::find_row(const std::string &col_name, const std::shared_ptr<void>& val)
-{
-    size_t col_i = col_index[col_name];
-    uint64_t col_s = type_registry.at(cols_[col_i].get_type()).size;
-    for (size_t i = 0; i < rows_.size(); ++i)
-    {
-        if (!memcmp(rows_[i].at(col_i).get(), val.get(), col_s))
-        {
-            return i;
-        }
-    }
-    throw std::runtime_error("TODO: exception");
-}
+
 std::vector<row> &table::get_rows()
 {
     return rows_;
@@ -150,4 +139,24 @@ void table::load_data()
         auto& x = rows_.emplace_back(sizes_);
         x.set_data(data_.read_some(offset += row_size, row_size));
     }
+}
+std::vector<row>::iterator table::find_first(const std::string &col_name, const std::shared_ptr<void> &val)
+{
+    return find_next(col_name, val, rows_.begin());
+}
+
+std::vector<row>::iterator table::find_next(const std::string &col_name, const std::shared_ptr<void> &val,
+    std::vector<row>::iterator start)
+{
+    size_t col_i = col_index[col_name];
+    uint64_t col_s = type_registry.at(cols_[col_i].get_type()).size;
+
+    for (auto it = start; it != rows_.end(); ++it)
+    {
+        if (!memcmp(it->at(col_i).get(), val.get(), col_s))
+        {
+            return it;
+        }
+    }
+    throw select_no_matches_error();
 }

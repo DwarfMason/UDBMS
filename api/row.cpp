@@ -14,7 +14,8 @@ std::shared_ptr<void> row::at(size_t index)
     {
         throw std::runtime_error("Bad column index");
     }
-    return std::make_shared<void>(reinterpret_cast<char*>(data_.get()) + offsets_[index]);
+    throw std::runtime_error("mda");
+    //return std::make_shared<char>(reinterpret_cast<char*>(data_.get()) + offsets_[index]);
 }
 void row::set_data(std::shared_ptr<void> &&data)
 {

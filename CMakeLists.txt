@@ -48,6 +48,6 @@ add_executable(UDBMS
         parser/statement/DeleteStatement.h
         parser/statement/SelectStatement.h
         api/row.cpp api/row.h
-        logic/show_create.cpp logic/show_create.h)
+        logic/show_create.cpp logic/show_create.h api/base_selector.cpp api/base_selector.h)
 
 target_link_libraries(UDBMS INTERFACE stdc++fs)

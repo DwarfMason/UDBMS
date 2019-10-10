@@ -24,7 +24,9 @@ public:
     void load_data();
     void insert_row(const std::map<std::string, std::shared_ptr<void>>& data);
     void delete_row(const std::string& col_name, const std::shared_ptr<void>& val); // EQUALS only
-    // std::vector<row>::iterator find_row(const std::string& col_name, const std::shared_ptr<void>& val, );
+    std::vector<row>::iterator find_first(const std::string& col_name, const std::shared_ptr<void>& val);
+    std::vector<row>::iterator find_next(const std::string& col_name, const std::shared_ptr<void>& val,
+        std::vector<row>::iterator start);
 private:
     std::string name_;
     std::vector<column> cols_;
@@ -32,7 +34,6 @@ private:
     std::vector<uint64_t> sizes_;
     std::vector<row> rows_;
     table_data data_;
-    size_t find_row(const std::string& col_name, const std::shared_ptr<void>& val);
 };
 
 JSONCONS_GETTER_SETTER_NAMED_TRAITS_DECL(table,
