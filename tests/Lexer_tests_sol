@@ -1,11 +1,6 @@
-Table dropped
-Table created
-Error: syntax error, unexpected NAME, expecting TABLE at 1.40-43
-Error: syntax error, unexpected NAME at 1.1
-Error: syntax error, unexpected LBRACKET at 1.1
-Error: syntax error, unexpected DIV at 1.1
-Error: syntax error, unexpected DIV, expecting RBRACKET at 1.16
-Error: syntax error, unexpected NAME at 1.2-4
-Error: syntax error, unexpected TABLE at 1.1-5
-Error: syntax error, unexpected NAME at 1.1
-Table dropped
+= Table created.
+200:syntax error, unexpected NAME, expecting TABLE
+200:syntax error, unexpected ';', expecting '('
+200:syntax error, unexpected NAME
+= Table created.
+= Table created.
