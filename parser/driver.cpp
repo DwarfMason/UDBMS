@@ -34,6 +34,7 @@ void UDBMS::Driver::parse_helper(std::istream &stream )
 {
       delete(scanner);
       scanner = new UDBMS::Scanner(&stream );
+      scanner->set_debug(true);
       parser = new UDBMS::DParse((*scanner) /* scanner */,
                                     (*this) /* driver */ );
       parser->parse();

@@ -80,10 +80,10 @@ void emit(char *s,...);
 %token NULL_y
 %token NOT
 
-%token<int> INTNUM
-%token<float> APPROXNUM
+%token<std::string> INTNUM
+%token<std::string> APPROXNUM
 %token<std::string> STRING
-%token<bool> BOOL
+%token<std::string> BOOL
 %token<std::string> NAME
 
 
@@ -118,6 +118,9 @@ void emit(char *s,...);
 
 /*expr*/ /*TODO*/
 %type<std::pair<std::string,std::string>> expr
+
+%type<std::string> value
+%type<std::vector<std::string>> values_list_expr
 %start stmt_list
 %%
 
@@ -156,9 +159,9 @@ params_expr                 /*std::vector<Column>*/
 
 create_single_param         /*Column*/
     : NAME var_type                             {$$ = CreateStatement::Column();$$.name = $1;$$.type = $2;}
-    | NAME var_type '(' INTNUM ')'              {$$ = CreateStatement::Column();$$.name = $1;$$.type = $2; $$.typeLen = $4;}
+    | NAME var_type '(' INTNUM ')'              {$$ = CreateStatement::Column();$$.name = $1;$$.type = $2; $$.typeLen = atoi($4.c_str());}
     | NAME var_type param_flags                 {$$ = CreateStatement::Column();$$.name = $1; $$.type = $2; $$.flags = $3;}
-    | NAME var_type '(' INTNUM ')' param_flags  {$$ = CreateStatement::Column();$$.name = $1; $$.type = $2; $$.typeLen = $4; $$.flags = $6;}
+    | NAME var_type '(' INTNUM ')' param_flags  {$$ = CreateStatement::Column();$$.name = $1; $$.type = $2; $$.typeLen = atoi($4.c_str()); $$.flags = $6;}
     ;
 
 param_flags                 /*std::vector<int>*/
@@ -217,7 +220,7 @@ drop_table_stmt:
 /*insert*/
 insert_stmt:        /*InsertStatement::Statement*/
     INSERT INTO NAME '(' name_list_expr ')'
-    VALUES '(' name_list_expr ')'   {
+    VALUES '(' values_list_expr ')'   {
         $$ = InsertStatement::Statement();
         $$.name = $3;
         $$.cols = $5;
@@ -229,12 +232,12 @@ insert_stmt:        /*InsertStatement::Statement*/
 
 /*update stmt*/
 update_stmt:        /*UpdateStatement::Statement*/
-    UPDATE NAME SET NAME '=' NAME expr  {
+    UPDATE NAME SET NAME '=' value WHERE expr  {
         $$ = UpdateStatement::Statement();
         $$.toUpdate = $2;
         $$.columnName = $4;
         $$.newValue = $6;
-        $$.expr = $7;
+        $$.expr = $8;
         driver.update($$);
     }
     ;
@@ -276,8 +279,9 @@ selector    /*std::vector<std::string> */
 /*end select expr*/
 
 /*expr */ /*TODO*/
-    expr:
-        NAME '=' NAME {$$ = std::pair<std::string,std::string>($1,$3);}
+expr
+    : NAME '=' value {$$ = std::pair<std::string,std::string>($1,$3);}
+    | NAME '=' NAME {$$ = std::pair<std::string,std::string>($1,$3);}
     ;
 /*common*/
 name_list_expr      /*std::vector<std::string>*/
@@ -291,6 +295,15 @@ var_type    /*Type*/
     | FLOAT     {$$ = CreateStatement::Type::FLOAT;}
     ;
 
+value       /*std::string*/
+    : INTNUM       {$$ = $1;}
+    | APPROXNUM    {$$ = $1;}
+    | STRING       {$$ = $1;}
+    | BOOL         {$$ = $1;}
+
+values_list_expr        /*std::vector<std::string>*/
+    : value                         {$$ = std::vector<std::string>();$$.push_back($1);}
+    | values_list_expr ',' value    {$$ = $1;$$.push_back($3);}
 %%
 
 
