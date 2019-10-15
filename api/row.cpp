@@ -28,7 +28,7 @@ void row::set_data(void* data)
 }
 row::~row()
 {
-    delete static_cast<char*>(data_);
+    delete[] static_cast<char*>(data_);
 }
 void *row::get_data()
 {
