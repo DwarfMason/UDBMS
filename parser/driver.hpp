@@ -9,6 +9,7 @@
 
 #include "scanner.hpp"
 #include "parser.tab.hh"
+#include "api/Cursor.h"
 #include <api/crud.h>
 #include <parser/statement/InsertStatement.h>
 #include <parser/statement/DeleteStatement.h>
@@ -40,7 +41,6 @@ public:
     * opt_limit
     * opt_into_list;
     */
-
     void create_table(CreateStatement::Statement stmt);
 
     /*
@@ -62,10 +62,23 @@ public:
 
 private:
 
-   void parse_helper( std::istream &stream );
+    void parse_helper( std::istream &stream );
 
-   UDBMS::DParse  *parser  = nullptr;
-   UDBMS::Scanner *scanner = nullptr;
+    UDBMS::DParse  *parser  = nullptr;
+    UDBMS::Scanner *scanner = nullptr;
+
+    class ValueManager{
+        private:
+            static void* createFoat(std::string val);
+            static void* createChar(std::string val);
+            static void* createInt(std::string val);
+        public:
+            static void* createPointer(std::string str, data_type type);
+
+            static auto getFloat(void *v){return *static_cast<float*>(v);}
+            static char* getChar(void *v){return static_cast<char*>(v);}
+            static int getInt(void *v){return *static_cast<int*>(v);}
+    };
 
 };
 

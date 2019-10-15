@@ -11,6 +11,7 @@ struct SelectStatement : BaseStatement
 {
     struct Statement
     {
+        std::string name;
         std::vector<std::string> selector;
         /* example
          * `id` = `qwe`

@@ -53,7 +53,7 @@ struct CreateStatement : BaseStatement
     };
 
     static void get_str(Statement stmt){
-        std::clog << "table name: " << stmt.tableName<< '\n';
+        std::clog << "Table name: " << stmt.tableName<< '\n';
         std::clog << "columns: " << '\n';
         for (int i = 0; i < stmt.columns.size(); ++i) {
             std::clog << "\tcolumn name: " << stmt.columns[i].name << "\n";

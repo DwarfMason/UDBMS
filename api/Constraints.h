@@ -2,7 +2,7 @@
 
 #include <jsoncons/json.hpp>
 
-class constraints
+class Constraints
 {
 public:
     [[nodiscard]] bool is_not_null() const;
@@ -18,7 +18,7 @@ private:
     bool index_ = false;
 };
 
-JSONCONS_GETTER_SETTER_NAMED_TRAITS_DECL(constraints,
+JSONCONS_GETTER_SETTER_NAMED_TRAITS_DECL(Constraints,
                                          (is_not_null, set_not_null, "not_null"),
                                          (is_unique_key, set_unique, "unique"),
                                          (is_index, set_index, "index"))

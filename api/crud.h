@@ -1,12 +1,12 @@
 #pragma once
 
 #include <string>
-#include <api/table.h>
+#include <api/Table.h>
 
 namespace API
 {
-    table create_table(const std::string& name);
-    table load_table(const std::string& name);
-    void drop_table(const table& tbl);
-    void commit_table(table& tbl);
+    Table create_table(const std::string& name);
+    Table load_table(const std::string& name);
+    void drop_table(const Table& tbl);
+    void commit_table(Table& tbl);
 }

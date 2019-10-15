@@ -7,13 +7,13 @@
 
 namespace fs = std::filesystem;
 
-table API::create_table(const std::string &name)
+Table API::create_table(const std::string &name)
 {
     auto meta_filename = name + METADATA_EXT;
     fs::path metadata_path(DATA_PATH / meta_filename);
 
     if (!fs::exists(metadata_path)) {
-        table t(name);
+        Table t(name);
         jsoncons::json json(t);
         std::ofstream file(metadata_path);
         file << jsoncons::pretty_print(json);
@@ -24,7 +24,7 @@ table API::create_table(const std::string &name)
         throw table_exist_error();
 }
 
-table API::load_table(const std::string &name)
+Table API::load_table(const std::string &name)
 {
     auto meta_filename = name + METADATA_EXT;
     fs::path metadata_path(DATA_PATH / meta_filename);
@@ -33,13 +33,13 @@ table API::load_table(const std::string &name)
         jsoncons::json json;
         std::ifstream file(metadata_path);
         json = jsoncons::json::parse(file);
-        return json.as<table>();
+        return json.as<Table>();
     }
     else
         throw table_not_exist_error();
 }
 
-void API::drop_table(const table &tbl)
+void API::drop_table(const Table &tbl)
 {
     auto meta_filename = tbl.get_name() + METADATA_EXT;
     auto data_filename = tbl.get_name() + STORAGE_EXT;
@@ -51,7 +51,7 @@ void API::drop_table(const table &tbl)
     fs::remove(data_filename);
 }
 
-void API::commit_table(table &tbl)
+void API::commit_table(Table &tbl)
 {
     // TODO #1: save data on commit
     // TODO #2: think about marking some chunks as "dirty" and write only them
@@ -70,7 +70,7 @@ void API::commit_table(table &tbl)
         for (const auto& c : tbl.get_columns()) {
             row_size += c.get_size();
         }
-        for (row& r : a)
+        for (Row& r : a)
         {
             tbl.get_data().push_row(row_size);
             tbl.get_data().write_some(offset += row_size, row_size, r.get_data());

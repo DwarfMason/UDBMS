@@ -80,6 +80,9 @@ void emit(char *s,...);
 %token NULL_y
 %token NOT
 
+%token AND
+%token OR
+
 %token<std::string> INTNUM
 %token<std::string> APPROXNUM
 %token<std::string> STRING
@@ -234,7 +237,7 @@ insert_stmt:        /*InsertStatement::Statement*/
 update_stmt:        /*UpdateStatement::Statement*/
     UPDATE NAME SET NAME '=' value WHERE expr  {
         $$ = UpdateStatement::Statement();
-        $$.toUpdate = $2;
+        $$.tableToUpdate = $2;
         $$.columnName = $4;
         $$.newValue = $6;
         $$.expr = $8;
@@ -261,12 +264,14 @@ delete_stmt:            /*DeleteStatement::Statement*/
 select_stmt             /*SelectStatement::Statement*/
     : SELECT selector FROM NAME WHERE expr    {
         $$ = SelectStatement::Statement();
+        $$.name = $4;
         $$.selector = $2;
         $$.expr = $6;
         driver.select($$);
     }
     | SELECT selector FROM NAME   {
               $$ = SelectStatement::Statement();
+              $$.name = $4;
               $$.selector = $2;
               driver.select($$);
           }
@@ -280,9 +285,20 @@ selector    /*std::vector<std::string> */
 
 /*expr */ /*TODO*/
 expr
-    : NAME '=' value {$$ = std::pair<std::string,std::string>($1,$3);}
-    | NAME '=' NAME {$$ = std::pair<std::string,std::string>($1,$3);}
+    : value '=' value {$$ = std::pair<std::string,std::string>($1,$3);}
+/*    | value '-' value
+    | value '*' value
+    | value '/' value
+    | value '>' value
+    | value '>=' value
+    | value '<=' value
+    | value '>' value
+    | value '<' value
+    | value AND value
+    | value OR value */
     ;
+
+
 /*common*/
 name_list_expr      /*std::vector<std::string>*/
     : NAME                      {$$ = std::vector<std::string>();$$.push_back($1);}
@@ -300,6 +316,7 @@ value       /*std::string*/
     | APPROXNUM    {$$ = $1;}
     | STRING       {$$ = $1;}
     | BOOL         {$$ = $1;}
+    | NAME         {$$ = $1;}
 
 values_list_expr        /*std::vector<std::string>*/
     : value                         {$$ = std::vector<std::string>();$$.push_back($1);}

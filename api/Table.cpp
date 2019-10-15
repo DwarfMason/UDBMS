@@ -1,66 +1,66 @@
-#include "table.h"
+#include "Table.h"
 
 #include <utility>
 #include <fmt/format.h>
 #include <exceptions.h>
 
-table::table(const std::string& name)
+Table::Table(const std::string& name)
 {
     set_name(name);
     data_ = table_data(name);
 }
 
-table::~table()
+Table::~Table()
 {
 
 }
 
-std::string table::get_name() const
+std::string Table::get_name() const
 {
     return name_;
 }
-void table::set_name(std::string name)
+void Table::set_name(std::string name)
 {
     name_ = std::move(name);
 }
 
-const std::vector<column>& table::get_columns() const
+const std::vector<Column>& Table::get_columns() const
 {
     return cols_;
 }
-void table::set_columns(std::vector<column> cols)
+void Table::set_columns(std::vector<Column> cols)
 {
     cols_ = std::move(cols);
     sizes_.clear();
     col_index.clear();
     for (size_t i = 0; i < cols_.size(); ++i)
     {
-        const column& col = cols_[i];
+        const Column& col = cols_[i];
         sizes_.push_back(col.get_size());
         col_index.insert_or_assign(col.get_name(), i);
     }
 }
 
-void table::add_column(const column &col)
+void Table::add_column(const Column &col)
 {
     cols_.push_back(col);
     col_index.insert_or_assign(col.get_name(), sizes_.size());
     sizes_.push_back(col.get_size());
 }
-table_data &table::get_data()
+table_data &Table::get_data()
 {
     return data_;
 }
 
-std::string table::get_create_query() const
+std::string Table::get_create_query() const
 {
     std::stringstream create_args, constraint_args;
     const std::string sql_query_tpl = "CREATE TABLE `{}` (\n{});";
     const std::string arg_tpl = "  `{}` {}{}\n";
     for (int i = 0; i < cols_.size(); ++i)
     {
-        const column& col = cols_[i];
-        const constraints& cts = col.get_constraints();
+        const Column& col = cols_[i];
+        const Constraints& cts = col.get_constraints();
         if (cts.is_primary_key()) {
             constraint_args << " PRIMARY KEY";
         } else {
@@ -98,33 +98,33 @@ std::string table::get_create_query() const
     );
 }
 
-void table::insert_row(const std::map<std::string, void*>& data)
+void Table::insert_row(const std::map<std::string, void*>& data)
 {
-    auto& row = rows_.emplace_back(sizes_);
+    auto& Row = rows_.emplace_back(sizes_);
     uint64_t row_size = 0;
     for (uint64_t s : sizes_)
     {
         row_size += s;
     }
-    row.set_data(new char[row_size]);
+    Row.set_data(new char[row_size]);
     for (const auto& kv : data) {
-        auto cell = row.at(col_index[kv.first]);
+        auto cell = Row.at(col_index[kv.first]);
         memcpy(cell, kv.second,
             type_registry.at(cols_[col_index[kv.first]].get_type()).size);
     }
 }
-void table::delete_row(const std::string &col_name, const void* val)
+void Table::delete_row(const std::string &col_name, const void* val)
 {
-    auto row = find_first(col_name, val);
-    rows_.erase(row);
+    auto Row = find_first(col_name, val);
+    rows_.erase(Row);
 }
 
-std::vector<row> table::get_rows()
+std::vector<Row> Table::get_rows()
 {
     return rows_;
 }
 
-void table::load_data()
+void Table::load_data()
 {
     uint64_t row_cnt = data_.get_row_count();
     uint64_t offset = sizeof(row_cnt);
@@ -140,13 +140,13 @@ void table::load_data()
         x.set_data(data_.read_some(offset += row_size, row_size));
     }
 }
-std::vector<row>::iterator table::find_first(const std::string &col_name, const void* val)
+std::vector<Row>::iterator Table::find_first(const std::string &col_name, const void* val)
 {
     return find_next(col_name, val, rows_.begin());
 }
 
-std::vector<row>::iterator table::find_next(const std::string &col_name, const void* val,
-    std::vector<row>::iterator start)
+std::vector<Row>::iterator Table::find_next(const std::string &col_name, const void* val,
+                                            std::vector<Row>::iterator start)
 {
     size_t col_i = col_index[col_name];
     uint64_t col_s = type_registry.at(cols_[col_i].get_type()).size;
@@ -160,7 +160,7 @@ std::vector<row>::iterator table::find_next(const std::string &col_name, const v
     }
     throw select_no_matches_error();
 }
-void table::set_cell_values(row& r, const std::map<std::string, void*>& kv)
+void Table::set_cell_values(Row& r, const std::map<std::string, void*>& kv)
 {
     uint64_t row_size = 0;
     for (uint64_t s : sizes_)
@@ -173,7 +173,7 @@ void table::set_cell_values(row& r, const std::map<std::string, void*>& kv)
             type_registry.at(cols_[col_index[elem.first]].get_type()).size);
     }
 }
-void table::delete_row(std::vector<row>::iterator pos)
+void Table::delete_row(std::vector<Row>::iterator pos)
 {
     rows_.erase(pos);
 }
