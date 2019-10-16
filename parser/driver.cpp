@@ -39,22 +39,23 @@ void UDBMS::Driver::parse_helper(std::stringstream &stream )
                                     (*this) /* driver */ );
       parser->parse();
 }
+
 void UDBMS::Driver::create_table(CreateStatement::Statement stmt)
 {
     try {
-        table tbl = API::create_table(stmt.tableName);
+        Table tbl = API::create_table(stmt.tableName);
         auto cols = stmt.columns;
-        std::map<std::string, column&> col_map;
+        std::map<std::string, Column&> col_map;
         for (const CreateStatement::Column& col : cols)
         {
             auto type = static_cast<data_type>(col.type);
-            column api_col(col.name, type);
+            Column api_col(col.name, type);
             if (col.typeLen != -1) {
                 api_col.set_size(col.typeLen);
             }
             if (!col.flags.empty())
             {
-                constraints api_cts;
+                Constraints api_cts;
                 for (int f : col.flags)
                 {
                     switch (f) {
@@ -81,7 +82,7 @@ void UDBMS::Driver::create_table(CreateStatement::Statement stmt)
 
         for (const CreateStatement::Constraint& ct : cts) {
             // TODO Use name of the constraint
-            constraints api_cts;
+            Constraints api_cts;
             switch (ct.constraint.type) {
                 case CreateStatement::Constraints::PRIMARY_KEY:
                     api_cts.set_not_null(true);
@@ -112,7 +113,7 @@ void UDBMS::Driver::drop_table(DropTableStatement::Statement stmt)
     try {
         for (const auto& table_name : stmt.keys)
         {
-            const table& t = API::load_table(table_name);
+            const Table& t = API::load_table(table_name);
             API::drop_table(t);
             std::cout << "Table created." << std::endl;
         }
@@ -136,18 +137,189 @@ void UDBMS::Driver::show_create(ShowCreateStatement::Statement stmt)
 }
 void UDBMS::Driver::delete_stmt(DeleteStatement::Statement stmt)
 {
-
+    std::cout << stmt.name << "\n";
+    std::cout << "where: " << stmt.expr.first << " = " << stmt.expr.second << '\n';
 }
+
+/*TODO constraint error*/
+/*TODO '*' selector*/
 void UDBMS::Driver::update(UpdateStatement::Statement stmt)
 {
 
+    std::cout << "Table to update: " << stmt.tableToUpdate << '\n';
+    std::cout << "new value: " << stmt.newValue << '\n';
+    std::cout << "Column name" << stmt.columnName << '\n';
+    std::cout << "where: " << stmt.expr.first << " = " << stmt.expr.second << '\n';
+
+
+    auto table = API::load_table(stmt.tableToUpdate);
+    Cursor curs(table);
+    std::vector<Column> cols = table.get_columns();
+    size_t col_index = -1;
+
+    for (int i = 0; i < cols.size(); ++i)
+    {
+        if (stmt.columnName == cols[i].get_name())
+        {
+            col_index = i;
+            break;
+        }
+    }
+
+    // Определить тип и скастовать void* в тип* (ифами)
+
+    auto new_value = stmt.newValue.c_str();
+    auto type = cols[col_index].get_type();
+    std::map<std::string, void*> keys;
+
+    keys.insert_or_assign(stmt.columnName, ValueManager::createPointer(stmt.newValue,type));
+    try {
+        while (true){
+            Row row = curs.next();
+            curs.update(keys);
+        }
+    } catch (cursor_eof_error &e) {
+
+    }
+    API::commit_table(table);
 }
+int getPosByName(const std::vector<Column> &cols,const std::string &name){
+    for (int i = 0; i < cols.size(); ++i) {
+        if  (cols.at(i).get_name() == name) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 void UDBMS::Driver::select(SelectStatement::Statement stmt)
 {
+    for (const auto & i : stmt.selector) {
+        std::cout << "Column to select:" << i <<'\n';
+    }
+    std::cout << "where: " << stmt.expr.first << " = " << stmt.expr.second << '\n';
 
+    Table table = API::load_table(stmt.name);
+    std::vector<Column> columns = table.get_columns();
+
+    /*TODO make it readable*/
+    /*if selector is not '*'*/
+        std::vector<int> selectedCols;
+        int pose;
+        for (const auto & j : stmt.selector) {
+            pose = getPosByName(columns,j);
+            if(pose != -1){
+                selectedCols.push_back(pose);
+            }else{
+                throw sql_error(303,"no such column");
+            }
+        }
+        Cursor curs(table);
+    std::vector<std::vector<std::string>> data;
+        while (true){
+            try {
+                Row row = curs.next();
+                std::vector<std::string> tempData;
+                for (int i = 0; i < selectedCols.size(); ++i) {
+                    if (columns[selectedCols[i]].get_type() == data_type::FLOAT)
+                        tempData.push_back(std::to_string(ValueManager::getFloat(row.at(selectedCols[i]))));
+                    if (columns[selectedCols[i]].get_type() == data_type::CHAR)
+                        tempData.push_back(std::string(ValueManager::getChar(row.at(selectedCols[i]))));
+                    if (columns[selectedCols[i]].get_type() == data_type::INTEGER)
+                        tempData.push_back(std::to_string(ValueManager::getInt(row.at(selectedCols[i]))));
+                }
+                data.push_back(tempData);
+            }catch (cursor_eof_error){
+                break;
+            }
+        }
+    /*end*/
+
+
+    /*output*/
+    for (int k = 0; k < data.size(); ++k) {
+        for (int j = 0; j < data[k].size(); ++j) {
+            std::cout << std::setw(20) << std::right << data[k][j];
+        }
+        std::cout << std::endl;
+    }
 }
+
+
+
 void UDBMS::Driver::insert(InsertStatement::Statement stmt)
 {
+    std::cout << "name: " << stmt.name << '\n';
+    for (const auto & col : stmt.cols) {
+        std::cout << "Column to insert:" << col <<'\n';
+    }
+    for (const auto & i : stmt.value) {
+        std::cout << "value to insert:" << i <<'\n';
+    }
 
+    Table tbl = API::load_table(stmt.name);
+    tbl.load_data();
+    std::vector<Column> columns = tbl.get_columns();
+    std::map<std::string,void*> mp;
+
+    for (int i = 0; i < stmt.cols.size(); ++i) {
+        int columnPos = getPosByName(columns,stmt.cols[i]);
+        if (columnPos != -1){
+            mp.insert_or_assign(stmt.cols[i],ValueManager::createPointer(stmt.value[i],columns[columnPos].get_type()));
+        } else {
+            throw sql_error(303,"no such column");
+        }
+    }
+    /*TODO check it on valid engine*/
+    tbl.insert_row(mp);
+    API::commit_table(tbl);
 }
 
+
+
+
+void *UDBMS::Driver::ValueManager::createFoat(std::string val)
+{
+    float *p;
+    try{
+        p = new float(std::stof(strdup(val.c_str())));
+    } catch (...) {
+        throw custom_exception(304,"bad value type");
+    }
+
+    return static_cast<void*>(p);
+}
+void *UDBMS::Driver::ValueManager::createChar(std::string val)
+{
+    char *p;
+    try{
+        p = strdup(val.c_str());
+    } catch (...) {
+        throw custom_exception(304,"bad value type");
+    }
+
+    return static_cast<void*>(p);
+}
+void *UDBMS::Driver::ValueManager::createInt(std::string val)
+{
+    int *p;
+    try{
+        p = new int(std::stoi(strdup(val.c_str())));
+    } catch (...) {
+        throw custom_exception(304,"bad value type");
+    }
+
+    return static_cast<void*>(p);
+}
+void *UDBMS::Driver::ValueManager::createPointer(std::string str, data_type type)
+{
+    if(data_type::INTEGER == type){
+        return createInt(str);
+    }
+    if(data_type::FLOAT == type){
+        return createFoat(str);
+    }
+    if(data_type::CHAR == type){
+        return createChar(str);
+    }
+}

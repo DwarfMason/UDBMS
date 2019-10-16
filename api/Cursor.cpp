@@ -1,13 +1,13 @@
 #include <exceptions.h>
-#include "cursor.h"
+#include "Cursor.h"
 
-cursor::cursor(const table& t)
+Cursor::Cursor(const Table& t)
 {
     tbl_ = t;
     pos_ = tbl_.get_rows().begin();
 }
 
-row cursor::next()
+Row Cursor::next()
 {
     auto ret = pos_;
     if (pos_ != tbl_.get_rows().end())
@@ -16,12 +16,12 @@ row cursor::next()
         throw cursor_eof_error();
     return *ret;
 }
-void cursor::update(const std::map<std::string, void *> &kv)
+void Cursor::update(const std::map<std::string, void *> &kv)
 {
     tbl_.set_cell_values(*pos_, kv);
 }
 
-void cursor::remove()
+void Cursor::remove()
 {
     if (pos_ != tbl_.get_rows().end())
         tbl_.delete_row(pos_);

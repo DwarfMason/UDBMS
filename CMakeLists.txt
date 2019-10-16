@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(UDBMS)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DECHO")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DECHO -fsanitize=address")
 include_directories(ext/jsoncons/include)
 include_directories(ext/fmt/include)
 
@@ -16,6 +16,7 @@ BISON_TARGET(bison_parser
 FLEX_TARGET(flexer
         parser/lexer.l
         ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.cc)
+set(bison -g)
 ADD_FLEX_BISON_DEPENDENCY(flexer bison_parser)
 
 include_directories(
@@ -27,9 +28,9 @@ include_directories(
 add_executable(UDBMS
         ext/fmt/src/format.cc
         main.cpp
-        api/table.cpp api/table.h
-        api/column.cpp api/column.h
-        api/constraints.cpp api/constraints.h
+        api/Table.cpp api/Table.h
+        api/Column.cpp api/Column.h
+        api/Constraints.cpp api/Constraints.h
         api/data_type.cpp api/data_type.h
         exceptions.cpp exceptions.h
         parser/driver.cpp
@@ -42,13 +43,13 @@ add_executable(UDBMS
         parser/statement/CreateStatement.h
         parser/statement/ShowCreateStatement.h
         parser/statement/DropTableStatement.h
-        api/cursor.cpp api/cursor.h
+        api/Cursor.cpp api/Cursor.h
         parser/statement/InsertStatement.h
         parser/statement/UpdateStatement.h
         parser/statement/DeleteStatement.h
         parser/statement/SelectStatement.h
-        api/row.cpp api/row.h
-        logic/show_create.cpp logic/show_create.h)
+        api/Row.cpp api/Row.h
+        logic/show_create.cpp logic/show_create.h parser/condition/Condition.cpp parser/condition/Condition.h)
 
 target_link_libraries(UDBMS INTERFACE stdc++fs)
 target_link_libraries(UDBMS PRIVATE pthread)

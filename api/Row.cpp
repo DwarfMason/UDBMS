@@ -1,5 +1,5 @@
-#include "row.h"
-row::row(const std::vector<uint64_t> &sizes)
+#include "Row.h"
+Row::Row(const std::vector<uint64_t> &sizes)
 {
     sizes_ = sizes;
     for (auto size : sizes_)
@@ -8,7 +8,7 @@ row::row(const std::vector<uint64_t> &sizes)
         row_size += size;
     }
 }
-void* row::at(size_t index)
+void* Row::at(size_t index)
 {
     if (data_ == nullptr)
     {
@@ -22,15 +22,16 @@ void* row::at(size_t index)
     return static_cast<char*>(data_) + offsets_[index];
     //return std::make_shared<char>(reinterpret_cast<char*>(data_.get()) + offsets_[index]);
 }
-void row::set_data(void* data)
+void Row::set_data(void* data)
 {
     data_ = data;
 }
-row::~row()
+Row::~Row()
 {
-    delete static_cast<char*>(data_);
+    // FIXME double-free on insert
+    //::operator delete(data_);
 }
-void *row::get_data()
+void *Row::get_data()
 {
     return data_;
 }

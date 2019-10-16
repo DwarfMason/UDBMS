@@ -79,6 +79,9 @@ NULL        { return token::NULL_y;     }
 [-+&~|^/%*(),.;!]   { return yytext[0]; }
 =                   { return yytext[0]; }
 
+AND     {return token::AND;}
+OR      {return token::OR;}
+
 TRUE    { yylval->build<std::string>(yytext); return token::BOOL; }
 FALSE   { yylval->build<std::string>(yytext); return token::BOOL; }
 

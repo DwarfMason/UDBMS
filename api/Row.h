@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 
-class row
+class Row
 {
 public:
-    explicit row(const std::vector<uint64_t>& sizes);
-    ~row();
+    explicit Row(const std::vector<uint64_t>& sizes);
+    ~Row();
     void* get_data();
     void set_data(void* data);
     void* at(size_t index);

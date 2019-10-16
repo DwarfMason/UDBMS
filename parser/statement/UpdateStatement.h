@@ -10,7 +10,7 @@ struct UpdateStatement : BaseStatement
 {
     struct Statement
     {
-        std::string toUpdate;
+        std::string tableToUpdate;
         std::string columnName;
         std::string newValue;
         /* example

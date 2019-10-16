@@ -23,6 +23,13 @@ struct sql_error : public std::runtime_error
     std::string msg_;
 };
 
+struct custom_exception : public sql_error
+{
+    custom_exception(uint16_t errcode, const std::string &msg)
+        : sql_error(errcode,msg){
+    }
+};
+
 struct table_not_exist_error: public sql_error
 {
     table_not_exist_error()
