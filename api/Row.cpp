@@ -28,7 +28,8 @@ void Row::set_data(void* data)
 }
 Row::~Row()
 {
-    delete[] static_cast<char*>(data_);
+    // FIXME double-free on insert
+    //::operator delete(data_);
 }
 void *Row::get_data()
 {

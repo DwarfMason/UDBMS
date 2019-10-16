@@ -22,6 +22,8 @@ std::string Table::get_name() const
 void Table::set_name(std::string name)
 {
     name_ = std::move(name);
+    data_ = table_data(name_);
+    // FIXME kavo?
 }
 
 const std::vector<Column>& Table::get_columns() const
@@ -36,7 +38,12 @@ void Table::set_columns(std::vector<Column> cols)
     for (size_t i = 0; i < cols_.size(); ++i)
     {
         const Column& col = cols_[i];
-        sizes_.push_back(col.get_size());
+        auto sz = col.get_size();
+        // TODO treat numeric types' size correct
+        // TODO split physical and logical size
+        if (sz == 0)
+            sz = type_registry.at(col.get_type()).size;
+        sizes_.push_back(sz);
         col_index.insert_or_assign(col.get_name(), i);
     }
 }
@@ -100,23 +107,23 @@ std::string Table::get_create_query() const
 
 void Table::insert_row(const std::map<std::string, void*>& data)
 {
-    auto& Row = rows_.emplace_back(sizes_);
+    auto& row = rows_.emplace_back(sizes_);
     uint64_t row_size = 0;
     for (uint64_t s : sizes_)
     {
         row_size += s;
     }
-    Row.set_data(new char[row_size]);
+    row.set_data(::operator new(row_size));
     for (const auto& kv : data) {
-        auto cell = Row.at(col_index[kv.first]);
+        auto cell = row.at(col_index[kv.first]);
         memcpy(cell, kv.second,
             type_registry.at(cols_[col_index[kv.first]].get_type()).size);
     }
 }
 void Table::delete_row(const std::string &col_name, const void* val)
 {
-    auto Row = find_first(col_name, val);
-    rows_.erase(Row);
+    auto row = find_first(col_name, val);
+    rows_.erase(row);
 }
 
 std::vector<Row> Table::get_rows()

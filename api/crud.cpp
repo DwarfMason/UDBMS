@@ -53,8 +53,8 @@ void API::drop_table(const Table &tbl)
 
 void API::commit_table(Table &tbl)
 {
-    // TODO #1: save data on commit
-    // TODO #2: think about marking some chunks as "dirty" and write only them
+    // TODO #1: think about marking some chunks as "dirty" and write only them
+    // TODO #2: iterate through table data and rewrite "dirty" rows
 
     auto meta_filename = tbl.get_name() + METADATA_EXT;
     fs::path metadata_path(DATA_PATH / meta_filename);
@@ -63,17 +63,20 @@ void API::commit_table(Table &tbl)
         jsoncons::json json(tbl);
         std::ofstream file(metadata_path);
         file << jsoncons::pretty_print(json);
-        tbl.get_data().purge();
+        auto td = tbl.get_data();
+        td.purge();
         auto a = tbl.get_rows();
         uint64_t row_size = 0;
         size_t offset = sizeof(uint64_t);
+        //TODO treat as physical size here (char(N) has physical size of N though)
         for (const auto& c : tbl.get_columns()) {
-            row_size += c.get_size();
+            row_size += type_registry.at(c.get_type()).size;
         }
         for (Row& r : a)
         {
-            tbl.get_data().push_row(row_size);
-            tbl.get_data().write_some(offset += row_size, row_size, r.get_data());
+            td.push_row(row_size);
+            td.write_some(offset, row_size, r.get_data());
+            offset += row_size;
         }
     }
     else
