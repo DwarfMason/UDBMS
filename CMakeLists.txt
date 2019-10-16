@@ -51,3 +51,4 @@ add_executable(UDBMS
         logic/show_create.cpp logic/show_create.h)
 
 target_link_libraries(UDBMS INTERFACE stdc++fs)
+target_link_libraries(UDBMS PRIVATE pthread)

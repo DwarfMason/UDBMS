@@ -13,7 +13,7 @@ UDBMS::Driver::~Driver()
    parser = nullptr;
 }
 
-void UDBMS::Driver::parse(std::istream &stream )
+void UDBMS::Driver::parse(std::stringstream &stream )
 {
     /*TODO*/
     try {
@@ -22,15 +22,15 @@ void UDBMS::Driver::parse(std::istream &stream )
     catch(sql_error & e)
     {
         std::cerr << e.error_code_ << ":" << e.msg_ << "\n";
-        char a = std::cin.get();
-        while(a != '\n') a = std::cin.get();
-        parse(stream);
+        char a = stream.get();
+        while(a != '\n') a = stream.get();
+        //parse(stream);
     }
 
 }
 
 
-void UDBMS::Driver::parse_helper(std::istream &stream )
+void UDBMS::Driver::parse_helper(std::stringstream &stream )
 {
       delete(scanner);
       scanner = new UDBMS::Scanner(&stream );
@@ -114,6 +114,7 @@ void UDBMS::Driver::drop_table(DropTableStatement::Statement stmt)
         {
             const table& t = API::load_table(table_name);
             API::drop_table(t);
+            std::cout << "Table created." << std::endl;
         }
     }
     catch (sql_error& e)

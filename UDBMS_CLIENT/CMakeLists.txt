@@ -3,4 +3,4 @@ project(UDBMS_CLIENT)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(UDBMS_CLIENT main.cpp)
+ADD_EXECUTABLE( UDBMS_CLIENT main.cpp )
