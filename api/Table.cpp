@@ -141,10 +141,12 @@ void Table::load_data()
         row_size += s;
     }
 
-    for (uint64_t curr_row = 0; curr_row < row_cnt; ++row_cnt)
+    for (uint64_t curr_row = 0; curr_row < row_cnt; ++curr_row)
     {
         auto& x = rows_.emplace_back(sizes_);
-        x.set_data(data_.read_some(offset += row_size, row_size));
+        auto d = data_.read_some(offset, row_size);
+        x.set_data(d);
+        offset += row_size;
     }
 }
 std::vector<Row>::iterator Table::find_first(const std::string &col_name, const void* val)

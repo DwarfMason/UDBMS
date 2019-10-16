@@ -10,6 +10,9 @@ table_data::table_data(const std::string &name)
     storage_path_ = fs::path(DATA_PATH / data_filename);
     if (!fs::exists(storage_path_)) {
         purge();
+    } else {
+        auto a = read_some(0, 8);
+        row_count_ = *static_cast<uint64_t*>(a);
     }
 }
 

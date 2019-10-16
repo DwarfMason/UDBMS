@@ -64,8 +64,8 @@ void API::commit_table(Table &tbl)
         std::ofstream file(metadata_path);
         file << jsoncons::pretty_print(json);
         auto td = tbl.get_data();
-        td.purge();
         auto a = tbl.get_rows();
+        td.purge();
         uint64_t row_size = 0;
         size_t offset = sizeof(uint64_t);
         //TODO treat as physical size here (char(N) has physical size of N though)

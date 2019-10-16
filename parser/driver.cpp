@@ -257,6 +257,7 @@ void UDBMS::Driver::insert(InsertStatement::Statement stmt)
     }
 
     Table tbl = API::load_table(stmt.name);
+    tbl.load_data();
     std::vector<Column> columns = tbl.get_columns();
     std::map<std::string,void*> mp;
 
