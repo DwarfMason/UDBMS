@@ -119,7 +119,7 @@ void table::delete_row(const std::string &col_name, const void* val)
     rows_.erase(row);
 }
 
-std::vector<row> &table::get_rows()
+std::vector<row> table::get_rows()
 {
     return rows_;
 }

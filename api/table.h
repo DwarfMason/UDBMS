@@ -19,7 +19,7 @@ public:
     void set_columns(std::vector<column> cols);
     void add_column(const column& col);
     [[nodiscard]] table_data& get_data();
-    [[nodiscard]] std::vector<row>& get_rows();
+    [[nodiscard]] std::vector<row> get_rows();
     [[nodiscard]] std::string get_create_query() const;
     void load_data();
     void insert_row(const std::map<std::string, void*>& data);
