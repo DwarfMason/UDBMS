@@ -4,11 +4,12 @@
 %defines
 
 %define api.namespace {UDBMS}
-%define parser_class_name {DParse}
-%error-verbose
-
+%define api.parser.class {DParse}
+%define parse.error verbose
+/*
+select id from qwe where ((id < 0) and (name = "aaa") or (id > 27/9 - 4/2))
+*/
 %code requires{
-
     #include "parser/statement/CreateStatement.h"
     #include "parser/statement/ShowCreateStatement.h"
     #include "parser/statement/DropTableStatement.h"
@@ -44,6 +45,12 @@ void emit(char *s,...);
 
 %define api.value.type variant
 %define parse.assert
+
+%left AND OR
+%left '=' "<=" ">=" '<' '>'
+%left '+' '-'
+%left '*' '/'
+
 
 %token END
 
@@ -98,6 +105,7 @@ void emit(char *s,...);
 %type<std::vector<CreateStatement::Constraint>> additional_constraints
 %type<CreateStatement::Constraint> additional_params
 %type<CreateStatement::Statement> create_params
+%type<CreateStatement::Statement> create_stmt
 %type<std::vector<CreateStatement::Column>> params_expr
 %type<CreateStatement::Column> create_single_param
 %type<std::vector<int>> param_flags
@@ -119,8 +127,7 @@ void emit(char *s,...);
 %type<SelectStatement::Statement> select_stmt
 %type<std::vector<std::string>> selector
 
-/*expr*/ /*TODO*/
-%type<std::pair<std::string,std::string>> expr
+/*expr*/ /*TODO expr*/
 
 %type<std::string> value
 %type<std::vector<std::string>> values_list_expr
@@ -134,20 +141,20 @@ stmt_list
     ;
 
 stmt
-    : create_stmt
-    | show_create
-    | drop_table_stmt
-    | select_stmt
-    | update_stmt
-    | insert_stmt
-    | delete_stmt
+    : create_stmt       {driver.create_table($1);}
+    | show_create       {driver.show_create($1);}
+    | drop_table_stmt   {driver.drop_table($1);}
+    | select_stmt       {driver.select($1);}
+    | update_stmt       {driver.update($1);}
+    | insert_stmt       {driver.insert($1);}
+    | delete_stmt       {driver.delete_stmt($1);}
     | END {exit(0);}
     ;
 
 
 /*create Table*/
 create_stmt:
-    CREATE TABLE NAME '(' create_params ')' {$5.tableName = $3;driver.create_table($5);}
+    CREATE TABLE NAME '(' create_params ')' {$5.tableName = $3;}
     ;
 
 create_params               /*Statement*/
@@ -200,7 +207,6 @@ show_create:
 	{
 	    $$ = ShowCreateStatement::Statement();
 	    $$.name = $4;
-		driver.show_create($$);
 	}
 	;
 /*end show create*/
@@ -211,7 +217,6 @@ drop_table_stmt:
 	{
 	    $$ = DropTableStatement::Statement();
         $$.keys = $3;
-	 	driver.drop_table($$);
 	}
 	;
 /*end drop Table */
@@ -228,7 +233,6 @@ insert_stmt:        /*InsertStatement::Statement*/
         $$.name = $3;
         $$.cols = $5;
         $$.value = $9;
-        driver.insert($$);
     }
     ;
 /*end insert*/
@@ -240,8 +244,7 @@ update_stmt:        /*UpdateStatement::Statement*/
         $$.tableToUpdate = $2;
         $$.columnName = $4;
         $$.newValue = $6;
-        $$.expr = $8;
-        driver.update($$);
+ /*       $$.expr = $8;   */ /*TODO*/
     }
     ;
 
@@ -253,8 +256,7 @@ delete_stmt:            /*DeleteStatement::Statement*/
       WHERE expr              {
         $$ = DeleteStatement::Statement();
         $$.name = $3;
-        $$.expr = $5;
-        driver.delete_stmt($$);
+   /*     $$.expr = $5;   */ /*TODO*/
     }
     ;
 
@@ -262,12 +264,11 @@ delete_stmt:            /*DeleteStatement::Statement*/
 
 /*select expr*/
 select_stmt             /*SelectStatement::Statement*/
-    : SELECT selector FROM NAME WHERE expr    {
+    : SELECT selector FROM NAME WHERE '(' expr ')'    {
         $$ = SelectStatement::Statement();
         $$.name = $4;
         $$.selector = $2;
-        $$.expr = $6;
-        driver.select($$);
+/*        $$.expr = $6; */ /*TODO*/
     }
     | SELECT selector FROM NAME   {
               $$ = SelectStatement::Statement();
@@ -285,19 +286,26 @@ selector    /*std::vector<std::string> */
 
 /*expr */ /*TODO*/
 expr
-    : value '=' value {$$ = std::pair<std::string,std::string>($1,$3);}
-/*    | value '-' value
-    | value '*' value
-    | value '/' value
-    | value '>' value
-    | value '>=' value
-    | value '<=' value
-    | value '>' value
-    | value '<' value
-    | value AND value
-    | value OR value */
+    : expr '=' expr     {emit("= \n");}
+    | expr '-' expr     {emit("- \n");}
+    | expr '*' expr     {emit("* \n");}
+    | expr '/' expr     {emit("/ \n");}
+    | expr ">=" expr    {emit(">= \n");}
+    | expr "<=" expr    {emit("<= \n");}
+    | expr '>' expr     {emit("> \n");}
+    | expr '<' expr     {emit("< \n");}
+    | expr AND expr     {emit("AND \n");}
+    | expr OR expr      {emit("OR \n");}
+    | '(' expr ')'
     ;
 
+expr
+    : INTNUM            {emit("int\n");}
+    | APPROXNUM         {emit("float\n");}
+    | STRING            {emit("string\n");}
+    | BOOL              {emit("bool\n");}
+    | NAME              {emit("name\n");}
+    ;
 
 /*common*/
 name_list_expr      /*std::vector<std::string>*/
@@ -316,7 +324,7 @@ value       /*std::string*/
     | APPROXNUM    {$$ = $1;}
     | STRING       {$$ = $1;}
     | BOOL         {$$ = $1;}
-    | NAME         {$$ = $1;}
+    ;
 
 values_list_expr        /*std::vector<std::string>*/
     : value                         {$$ = std::vector<std::string>();$$.push_back($1);}

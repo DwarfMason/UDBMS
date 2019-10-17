@@ -2,6 +2,7 @@
 %option yyclass="UDBMS::Scanner"
 %option c++
 %option stack
+
 %{
 #include <string>
 #include <stdarg.h>
@@ -76,7 +77,8 @@ NULL        { return token::NULL_y;     }
 \"(\\.|\"\"|[^"\n])*\"  { yylval->build<std::string>(yytext); return token::STRING; }
 
 
-[-+&~|^/%*(),.;!]   { return yytext[0]; }
+[-+&~|^/%*(),.;!(>=)(<=)><]   { return yytext[0]; }
+
 =                   { return yytext[0]; }
 
 AND     {return token::AND;}

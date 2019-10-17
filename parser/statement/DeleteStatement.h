@@ -6,7 +6,7 @@
 #define DELETESTATEMENT_H
 #include <string>
 #include "BaseStatement.h"
-struct DeleteStatement : BaseStatement
+struct DeleteStatement : public BaseStatement
 {
     struct Statement
     {

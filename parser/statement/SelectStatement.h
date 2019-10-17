@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 #include "BaseStatement.h"
-struct SelectStatement : BaseStatement
+struct SelectStatement : public BaseStatement
 {
     struct Statement
     {

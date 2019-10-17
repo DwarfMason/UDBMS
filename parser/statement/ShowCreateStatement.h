@@ -8,7 +8,7 @@
 #include <string>
 #include "BaseStatement.h"
 
-struct ShowCreateStatement : BaseStatement
+struct ShowCreateStatement : public BaseStatement
 {
     struct Statement
     {

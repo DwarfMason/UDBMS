@@ -76,7 +76,14 @@ private:
             static void* createPointer(std::string str, data_type type);
 
             static auto getFloat(void *v){return *static_cast<float*>(v);}
-            static char* getChar(void *v){return static_cast<char*>(v);}
+            static char* getChar(void *v,size_t size = 1){
+                char * res = new char[size+1];
+                for (int i = 0; i < size; ++i) {
+                    res[i] = *(static_cast<char*>(v)+i);
+                }
+                res[size] = '\0';
+                return res;
+            ;}
             static int getInt(void *v){return *static_cast<int*>(v);}
     };
 

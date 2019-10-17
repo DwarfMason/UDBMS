@@ -11,7 +11,7 @@
 #include <iostream>
 #include "BaseStatement.h"
 
-struct CreateStatement : BaseStatement
+struct CreateStatement : public BaseStatement
 {
     enum class Type{
         INTEGER,

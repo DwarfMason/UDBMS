@@ -6,7 +6,7 @@
 #define UPDATESTATEMENT_H
 #include <string>
 #include "BaseStatement.h"
-struct UpdateStatement : BaseStatement
+struct UpdateStatement : public BaseStatement
 {
     struct Statement
     {

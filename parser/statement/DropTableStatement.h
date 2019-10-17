@@ -8,7 +8,7 @@
 #include <vector>
 #include "BaseStatement.h"
 
-struct DropTableStatement : BaseStatement
+struct DropTableStatement : public BaseStatement
 {
     struct Statement {
         std::vector<std::string> keys;

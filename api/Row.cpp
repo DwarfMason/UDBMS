@@ -15,7 +15,7 @@ void* Row::at(size_t index)
         throw std::runtime_error("No data in row");
     }
     if (index < 0 and index >= sizes_.size())
-    {
+      {
         throw std::runtime_error("Bad column index");
     }
     //throw std::runtime_error("mda");

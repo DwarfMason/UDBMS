@@ -24,7 +24,7 @@ void UDBMS::Driver::parse(std::istream &stream )
         std::cerr << e.error_code_ << ":" << e.msg_ << "\n";
         char a = std::cin.get();
         while(a != '\n') a = std::cin.get();
-        parse(stream);
+//        parse(stream);
     }
 
 }
@@ -138,10 +138,34 @@ void UDBMS::Driver::delete_stmt(DeleteStatement::Statement stmt)
 {
     std::cout << stmt.name << "\n";
     std::cout << "where: " << stmt.expr.first << " = " << stmt.expr.second << '\n';
+    auto table = API::load_table(stmt.name);
+
+    table.load_data();
+    Cursor curs(table);
+    curs.next();
+    while (true) {
+        try {
+            curs.next();
+            if (false) /* TODO expr result*/
+                curs.remove();
+        }
+        catch (cursor_eof_error) {
+            break;
+        }
+    }
+    API::commit_table(table);
+}
+
+int getPosByName(const std::vector<Column> &cols,const std::string &name){
+    for (int i = 0; i < cols.size(); ++i) {
+        if  (cols.at(i).get_name() == name) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 /*TODO constraint error*/
-/*TODO '*' selector*/
 void UDBMS::Driver::update(UpdateStatement::Statement stmt)
 {
 
@@ -152,87 +176,74 @@ void UDBMS::Driver::update(UpdateStatement::Statement stmt)
 
 
     auto table = API::load_table(stmt.tableToUpdate);
+    table.load_data();
     Cursor curs(table);
-    std::vector<Column> cols = table.get_columns();
-    size_t col_index = -1;
-
-    for (int i = 0; i < cols.size(); ++i)
-    {
-        if (stmt.columnName == cols[i].get_name())
-        {
-            col_index = i;
+    std::vector<Column> columns = table.get_columns();
+    int pos = getPosByName(columns,stmt.columnName);
+    while (true) {
+        try {
+            Row row = curs.next();
+            if (false) /* TODO expr result*/
+                memcpy(row.at(pos),
+                    ValueManager::createPointer(stmt.newValue,columns[pos].get_type()),
+                    columns[pos].get_size());
+        }
+        catch (cursor_eof_error) {
             break;
         }
     }
-
-    // Определить тип и скастовать void* в тип* (ифами)
-
-    auto new_value = stmt.newValue.c_str();
-    auto type = cols[col_index].get_type();
-    std::map<std::string, void*> keys;
-
-    keys.insert_or_assign(stmt.columnName, ValueManager::createPointer(stmt.newValue,type));
-    try {
-        while (true){
-            Row row = curs.next();
-            curs.update(keys);
-        }
-    } catch (cursor_eof_error &e) {
-
-    }
     API::commit_table(table);
 }
-int getPosByName(const std::vector<Column> &cols,const std::string &name){
-    for (int i = 0; i < cols.size(); ++i) {
-        if  (cols.at(i).get_name() == name) {
-            return i;
-        }
-    }
-    return -1;
-}
+
+
 
 void UDBMS::Driver::select(SelectStatement::Statement stmt)
 {
-    for (const auto & i : stmt.selector) {
-        std::cout << "Column to select:" << i <<'\n';
-    }
-    std::cout << "where: " << stmt.expr.first << " = " << stmt.expr.second << '\n';
 
     Table table = API::load_table(stmt.name);
+    table.load_data();
     std::vector<Column> columns = table.get_columns();
 
+    std::vector<std::vector<std::string>> data;
+
     /*TODO make it readable*/
-    /*if selector is not '*'*/
+
         std::vector<int> selectedCols;
         int pose;
-        for (const auto & j : stmt.selector) {
-            pose = getPosByName(columns,j);
-            if(pose != -1){
-                selectedCols.push_back(pose);
-            }else{
-                throw sql_error(303,"no such column");
+        if  (stmt.selector[0] != "*"){
+            for (const auto & j : stmt.selector) {
+                pose = getPosByName(columns,j);
+                if(pose != -1){
+                    selectedCols.push_back(pose);
+                }else{
+                    throw sql_error(303,"no such column");
+                }
+            }
+        } else {
+            /*if selector is '*'*/
+            for (int i = 0; i < columns.size(); ++i) {
+                selectedCols.push_back(i);
             }
         }
+
         Cursor curs(table);
-    std::vector<std::vector<std::string>> data;
         while (true){
             try {
                 Row row = curs.next();
                 std::vector<std::string> tempData;
-                for (int i = 0; i < selectedCols.size(); ++i) {
-                    if (columns[selectedCols[i]].get_type() == data_type::FLOAT)
-                        tempData.push_back(std::to_string(ValueManager::getFloat(row.at(selectedCols[i]))));
-                    if (columns[selectedCols[i]].get_type() == data_type::CHAR)
-                        tempData.push_back(std::string(ValueManager::getChar(row.at(selectedCols[i]))));
-                    if (columns[selectedCols[i]].get_type() == data_type::INTEGER)
-                        tempData.push_back(std::to_string(ValueManager::getInt(row.at(selectedCols[i]))));
+                for (int selectedCol : selectedCols) {
+                    if (columns[selectedCol].get_type() == data_type::FLOAT)
+                        tempData.push_back(std::to_string(ValueManager::getFloat(row.at(selectedCol))));
+                    if (columns[selectedCol].get_type() == data_type::CHAR)
+                        tempData.push_back(std::string(ValueManager::getChar(row.at(selectedCol),columns[selectedCol].get_size())));
+                    if (columns[selectedCol].get_type() == data_type::INTEGER)
+                        tempData.push_back(std::to_string(ValueManager::getInt(row.at(selectedCol))));
                 }
                 data.push_back(tempData);
             }catch (cursor_eof_error){
                 break;
             }
         }
-    /*end*/
 
 
     /*output*/

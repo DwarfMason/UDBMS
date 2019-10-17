@@ -8,7 +8,7 @@
 #include <vector>
 #include "BaseStatement.h"
 
-struct InsertStatement : BaseStatement
+struct InsertStatement : public BaseStatement
 {
     struct Statement
     {

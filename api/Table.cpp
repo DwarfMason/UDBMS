@@ -126,7 +126,7 @@ void Table::delete_row(const std::string &col_name, const void* val)
     rows_.erase(row);
 }
 
-std::vector<Row> Table::get_rows()
+std::vector<Row>& Table::get_rows()
 {
     return rows_;
 }
