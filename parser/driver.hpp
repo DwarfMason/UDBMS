@@ -29,7 +29,7 @@ public:
     * parse - parse from a c++ input stream
     * @param is - std::istream&, valid input stream
     */
-   void parse( std::istream &iss );
+   void parse( std::stringstream &iss );
 
    /*
     * SELECT select_expr_list
@@ -41,6 +41,7 @@ public:
     * opt_limit
     * opt_into_list;
     */
+
     void create_table(CreateStatement::Statement stmt);
 
     /*
@@ -62,10 +63,10 @@ public:
 
 private:
 
-    void parse_helper( std::istream &stream );
+   void parse_helper( std::stringstream &stream );
 
-    UDBMS::DParse  *parser  = nullptr;
-    UDBMS::Scanner *scanner = nullptr;
+   UDBMS::DParse  *parser  = nullptr;
+   UDBMS::Scanner *scanner = nullptr;
 
     class ValueManager{
         private:

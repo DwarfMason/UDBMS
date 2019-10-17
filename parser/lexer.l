@@ -15,7 +15,7 @@
 
 using token = UDBMS::DParse::token;
 
-#define yyterminate() return token::END
+
 #define YY_NO_UNISTD_H
 %}
 
