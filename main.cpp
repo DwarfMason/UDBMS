@@ -15,25 +15,28 @@ void *socketThread(void *arg) {
     int newSocket = *((int *) arg);
 
     while (true) {
-        std::stringstream from_client;
-        UDBMS::Driver driver;
         int bytes_read;
         size_t size_to_get;
-
         recv(newSocket, &size_to_get, sizeof(size_to_get), 0);
-        char *buf = new char[size_to_get];
+        char *buf = new char[size_to_get + 1];
+        buf[size_to_get] = '\0';
         bytes_read = recv(newSocket, buf, size_to_get, 0);
+        std::cout << std::string(buf);
         pthread_mutex_lock(&lock);
-        from_client << *buf;
+        UDBMS::Driver driver;
+        std::stringstream from_client;
+        from_client << std::string(buf);
 
         if (bytes_read <= 0) break;
 
         driver.parse( from_client );
-        std::string strToSend(buf);
-        size_t sizeToSend = strToSend.size();
+        std::string str_to_send(buf);
+        size_t size_to_send = str_to_send.size();
         pthread_mutex_unlock(&lock);
-        send(newSocket, &sizeToSend, sizeof(size_to_get), 0);
-        send(newSocket, buf, size_to_get, 0);
+
+
+        send(newSocket, &size_to_send, sizeof(size_to_send), 0);
+        send(newSocket, buf, size_to_send, 0);
     }
     sleep(1);
 
@@ -65,7 +68,7 @@ int main() {
     serverSocket = socket(PF_INET, SOCK_STREAM, 0);
 
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(2080);
+    serverAddr.sin_port = htons(2096);
     serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
