@@ -22,8 +22,8 @@ void UDBMS::Driver::parse(std::stringstream &stream )
     catch(sql_error & e)
     {
         std::cerr << e.error_code_ << ":" << e.msg_ << "\n";
-        char a = stream.get();
-        while(a != '\n') a = stream.get();
+       /* char a = stream.get();
+        while(a != '\n') a = stream.get();*/
         //parse(stream);
     }
 

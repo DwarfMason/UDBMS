@@ -24,7 +24,7 @@ void *socketThread(void *arg) {
         char *buf = new char[size_to_get];
         bytes_read = recv(newSocket, buf, size_to_get, 0);
         pthread_mutex_lock(&lock);
-        from_client << buf;
+        from_client << *buf;
 
         if (bytes_read <= 0) break;
 
@@ -65,7 +65,7 @@ int main() {
     serverSocket = socket(PF_INET, SOCK_STREAM, 0);
 
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(2081);
+    serverAddr.sin_port = htons(2080);
     serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
