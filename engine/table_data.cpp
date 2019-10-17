@@ -8,12 +8,11 @@ table_data::table_data(const std::string &name)
 {
     auto data_filename = name + STORAGE_EXT;
     storage_path_ = fs::path(DATA_PATH / data_filename);
-    if (!fs::exists(storage_path_)) {
-        purge();
-    } else {
+    if (fs::exists(storage_path_)) {
         auto a = read_some(0, 8);
         row_count_ = *static_cast<uint64_t*>(a);
-    }
+    } else
+        purge();
 }
 
 void* table_data::read_value(size_t offset, data_type type)
