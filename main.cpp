@@ -7,42 +7,69 @@
 #include <arpa/inet.h>
 #include <fcntl.h> // for open
 #include <unistd.h> // for close
-#include<pthread.h>
+#include <thread>
+#include "Server.h"
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+#define PORT 2077
 
-void *socketThread(void *arg) {
-    int newSocket = *((int *) arg);
+void *socket_thread(int* serverSocket) {
+
+    struct sockaddr_storage server_storage;
+    socklen_t addr_size;
+    addr_size = sizeof server_storage;
+    int new_socket = accept(*serverSocket, (struct sockaddr *) &server_storage, &addr_size);
+    std::stringstream buffer;
+    std::stringstream buffer_cout;
+    std::stringstream buffer_cerr;
+    std::streambuf *old_cerr = std::cerr.rdbuf(buffer_cerr.rdbuf());
+    std::streambuf *old_cout = std::cout.rdbuf(buffer_cout.rdbuf());
+
 
     while (true) {
         int bytes_read;
         size_t size_to_get;
-        recv(newSocket, &size_to_get, sizeof(size_to_get), 0);
+
+        recv(new_socket, &size_to_get, sizeof(size_to_get), 0);
         char *buf = new char[size_to_get + 1];
         buf[size_to_get] = '\0';
-        bytes_read = recv(newSocket, buf, size_to_get, 0);
-        std::cout << std::string(buf);
-        pthread_mutex_lock(&lock);
+        bytes_read = recv(new_socket, buf, size_to_get, 0);
+
+        buffer_cout.str("");
+        buffer_cerr.str("");
+
+
+     //   pthread_mutex_lock(&lock);
         UDBMS::Driver driver;
         std::stringstream from_client;
         from_client << std::string(buf);
 
         if (bytes_read <= 0) break;
 
-        driver.parse( from_client );
-        std::string str_to_send(buf);
-        size_t size_to_send = str_to_send.size();
-        pthread_mutex_unlock(&lock);
+        driver.parse(from_client);
 
+        char *send_data = strdup(buffer_cout.str().c_str());
+        char *send_cerr = strdup(buffer_cerr.str().c_str());
 
-        send(newSocket, &size_to_send, sizeof(size_to_send), 0);
-        send(newSocket, buf, size_to_send, 0);
+        size_t size_send_data = buffer_cout.str().size();
+        size_t size_send_cerr = buffer_cerr.str().size();
+       // pthread_mutex_unlock(&lock);
+
+        if (size_send_data > size_send_cerr) {
+            send(new_socket, &size_send_data, sizeof(size_send_data), 0);
+            send(new_socket, "0", sizeof(char), 0);
+            send(new_socket, send_data, size_send_data, 0);
+        } else {
+            send(new_socket, &size_send_cerr, sizeof(size_send_cerr), 0);
+            send(new_socket, "1", sizeof(char), 0);
+            send(new_socket, send_cerr, size_send_cerr, 0);
+        }
+
     }
     sleep(1);
 
-    printf("Exit socketThread \n");
+    printf("%d Exit socket_thread \n");
 
-    close(newSocket);
+    close(new_socket);
 
     pthread_exit(nullptr);
 
@@ -60,44 +87,12 @@ int main() {
         out.close();
     }
 
-    int serverSocket, newSocket;
-    struct sockaddr_in serverAddr;
-    struct sockaddr_storage serverStorage;
-    socklen_t addr_size;
-
-    serverSocket = socket(PF_INET, SOCK_STREAM, 0);
-
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(2096);
-    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-    memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
-    bind(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-
-    if (listen(serverSocket, 50) == 0)
-        printf("Listening\n");
-    else
-        printf("Error\n");
-
-    pthread_t tid[60];
-
-    int i = 0;
-
-    while (true) {
-        addr_size = sizeof serverStorage;
-        newSocket = accept(serverSocket, (struct sockaddr *) &serverStorage, &addr_size);
-
-        if (pthread_create(&tid[i], nullptr, socketThread, &newSocket) != 0)
-            printf("Failed to create thread\n");
-
-        if (i >= 50) {
-            i = 0;
-            while (i < 50) {
-                pthread_join(tid[i++], nullptr);
-            }
-            i = 0;
-        }
-    }
+    Server server{};
+    server.ServerInit(PORT);
 
 
+    /*for (int i = 0; i < 35; i++)
+        tid[i].join();*/
+        while (true){};
 }
+

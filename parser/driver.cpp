@@ -22,9 +22,9 @@ void UDBMS::Driver::parse(std::stringstream &stream )
     catch(sql_error & e)
     {
         std::cerr << e.error_code_ << ":" << e.msg_ << "\n";
-       /* char a = stream.get();
-        while(a != '\n') a = stream.get();*/
-        //parse(stream);
+        /*char a = stream.get();
+        while(a != '\n') a = stream.get();
+        parse(stream);*/
     }
 
 }
@@ -115,7 +115,7 @@ void UDBMS::Driver::drop_table(DropTableStatement::Statement stmt)
         {
             const Table& t = API::load_table(table_name);
             API::drop_table(t);
-            std::cout << "Table created." << std::endl;
+            std::cout << "Table dropped." << std::endl;
         }
     }
     catch (sql_error& e)
