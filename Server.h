@@ -6,38 +6,31 @@
 #define UDBMS_SERVER_H
 #include <filesystem>
 #include "parser/driver.hpp"
-#include<sys/socket.h>
-#include<netinet/in.h>
-#include<string.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string>
 #include <arpa/inet.h>
 #include <fcntl.h> // for open
 #include <unistd.h> // for close
 #include <thread>
+#include <mutex>
 
-
-class Connection {
-public:
-    Connection() = default;
-    explicit Connection(int server_sock): _server_sock(server_sock){}
-
-    void ConnectionInit();
-
-private:
-    int _connection_sock;
-    int _server_sock;
-
-};
+#define MAX_CONNECTIONS 35
+#define MIN(a, b)       ((a) < (b) ? (a) : (b))
 
 class Server {
 public:
     Server() = default;
 
     void ServerInit(int port);
-
-    int _server_sock;
+    void ClientTask(int id);
+    void AcceptConnection(int id);
 
 private:
-    Connection cid[35];
+    int _server_sock;
+    /*fd_set readset;*/
+    std::vector<int> connection_socket;
+    std::vector<std::thread> threads;
     int _hostshort;
     struct sockaddr_in _server_addr;
 };

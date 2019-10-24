@@ -3,6 +3,7 @@
 #include <netinet/in.h>
 #include <zconf.h>
 #include <string.h>
+#include <arpa/inet.h>
 
 int main()
 {
@@ -19,8 +20,8 @@ int main()
     }
 
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(2077); // или любой другой порт...
-    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    addr.sin_port = htons(2079); // или любой другой порт...
+    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     if(connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
     {
         perror("connect");
@@ -36,6 +37,7 @@ int main()
         int bytes_read = recv(sock, &size, sizeof(size), 0);
         if (bytes_read <= 0) {
             perror("Server connection lost");
+            close(sock);
             break;
         }
         char *recv_data = new char[size + 1];
