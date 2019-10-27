@@ -10,7 +10,7 @@ touch ../tests/Create_table_res_err
 exec 3>&1 1>> ../tests/Create_table_res_ok
 exec 4>&2 2>> ../tests/Create_table_res_err
 
-if ./UDBMS< ../tests/Create_table_input
+if ../UDBMS_CLIENT/cmake_build_debug/UDBMS_CLIENT< ../tests/Create_table_input
 then
 	exec 1>&3
 	exec 2>&4 

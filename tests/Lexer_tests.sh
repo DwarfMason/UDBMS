@@ -10,7 +10,7 @@ touch ../tests/Lexer_tests_res_err
 exec 3>&1 1>> ../tests/Lexer_tests_res_ok
 exec 4>&2 2>> ../tests/Lexer_tests_res_err
 
-if ./UDBMS< ../tests/Lexer_tests_input
+if ../UDBMS_CLIENT/cmake_build_debug/UDBMS_CLIENT< ../tests/Lexer_tests_input
 then
 	exec 1>&3
 	exec 2>&4 

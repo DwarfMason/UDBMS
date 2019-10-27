@@ -18,9 +18,9 @@ void Server::ServerInit(int port) {
          sizeof(_server_addr));
 
     if (listen(_server_sock, 5) == 0)
-        printf("Listening\n");
+  /*      printf("Listening\n");
     else
-        printf("Error\n");
+        printf("Error\n");*/
 
     this->connection_socket.resize(MAX_CONNECTIONS);
 
@@ -44,7 +44,7 @@ void  Server::ClientTask(int id) {
 
         bytes_read = recv(this->connection_socket[id], &size_to_get, sizeof(size_to_get), 0);
         if (bytes_read <= 0){
-            perror ("Client connection lost");
+           // perror ("Client connection lost");
             close(this->connection_socket[id]);
             break;
         }
@@ -54,7 +54,7 @@ void  Server::ClientTask(int id) {
         bytes_read = recv(this->connection_socket[id], buf, size_to_get, 0);
 
         if (bytes_read <= 0){
-            perror ("Client connection lost");
+           // perror ("Client connection lost");
             close(this->connection_socket[id]);
             break;
         }
@@ -99,7 +99,7 @@ void  Server::ClientTask(int id) {
     }
     sleep(1);
 
-    printf("Exit socket_thread \n");
+ //   printf("Exit socket_thread \n");
 
     close(this->connection_socket[id]);
 }

@@ -9,7 +9,7 @@ cd ./cmake-build-debug/
 ok_cnt=0
 tests=2
 
-./UDBMS< ../tests/Other_tests_input
+../UDBMS_CLIENT/cmake_build_debug/UDBMS_CLIENT< ../tests/Other_tests_input
 
 
 if [ -e config ]

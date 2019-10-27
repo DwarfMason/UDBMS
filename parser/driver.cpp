@@ -24,7 +24,7 @@ void UDBMS::Driver::parse(std::stringstream &stream )
         std::cerr << e.error_code_ << ":" << e.msg_ << "\n";
         /*char a = stream.get();
         while(a != '\n') a = stream.get();*/
-        //parse(stream);*/
+        //parse(stream);
     }
 
 }
