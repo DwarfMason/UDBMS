@@ -5,11 +5,10 @@
 #include "Client.h"
 
 void Client::ClientInit(int port) {
-    int sock;
     struct sockaddr_in addr;
 
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
+    this->_sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (_sock < 0) {
         perror("socket");
         exit(1);
     }
@@ -17,24 +16,26 @@ void Client::ClientInit(int port) {
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    if (connect(sock, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+    if (connect(this->_sock, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
         perror("connect");
         exit(2);
     }
-    if (TESTS)
-        RUN_ALL_TESTS();
-    else this->ClientCommunication(&sock);
+    if (!TESTS) this->ClientCommunication(&this->_sock);
 }
 
-void Client::ClientCommunication(int *sock) {
+void Client::ClientCommunication(int *sock, const std::string& request) {
     while (true) {
         std::string to_server_msg;
         char c;
         to_server_msg = "";
+
+        if (!TESTS)
         while (std::cin.get(c)) {
             to_server_msg += c;
             if (c == ';') break;
         }
+        else to_server_msg = request;
+
         //std::getline(std::cin, to_server_msg);
         size_t size = to_server_msg.size();
         send(*sock, &size, sizeof(size_t), 0);
@@ -65,4 +66,8 @@ bool Client::RecCheck(int bytes_read, int *sock) {
         return false;
     }
     return true;
+}
+
+int &Client::GetSocket() {
+    return this->_sock;
 }

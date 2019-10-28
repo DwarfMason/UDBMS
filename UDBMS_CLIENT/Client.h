@@ -7,10 +7,10 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <zconf.h>
-#include <string.h>
+#include <string>
 #include <arpa/inet.h>
 #include <iostream>
-#include <gtest/gtest.h>
+#include <memory.h>
 
 #define TESTS false
 
@@ -19,10 +19,11 @@ public:
     explicit Client() = default;
 
     void ClientInit(int port);
-    void ClientCommunication(int* sock);
+    void ClientCommunication(int* sock, const std::string& request="0");
+    int& GetSocket();
 
 private:
-    int _port;
+    int _sock;
     bool RecCheck(int bytes_read, int* sock);
 };
 
