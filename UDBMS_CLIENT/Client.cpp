@@ -20,7 +20,7 @@ void Client::ClientInit(int port) {
         perror("connect");
         exit(2);
     }
-    if (!TESTS) this->ClientCommunication(&this->_sock);
+    if (!TESTING) this->ClientCommunication(&this->_sock);
 }
 
 void Client::ClientCommunication(int *sock, const std::string& request) {
@@ -29,7 +29,7 @@ void Client::ClientCommunication(int *sock, const std::string& request) {
         char c;
         to_server_msg = "";
 
-        if (!TESTS)
+        if (!TESTING)
         while (std::cin.get(c)) {
             to_server_msg += c;
             if (c == ';') break;
@@ -56,6 +56,7 @@ void Client::ClientCommunication(int *sock, const std::string& request) {
             std::cerr << recv_data;
         else
             std::cout << recv_data;
+        if(TESTING) break;
     }
 }
 
