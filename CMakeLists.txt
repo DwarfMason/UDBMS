@@ -53,3 +53,6 @@ add_executable(UDBMS
 
 target_link_libraries(UDBMS INTERFACE stdc++fs)
 target_link_libraries(UDBMS PRIVATE pthread)
+
+# Client
+add_subdirectory(UDBMS_CLIENT)
