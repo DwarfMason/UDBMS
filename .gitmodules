@@ -4,3 +4,6 @@
 [submodule "ext/YeltsinDB"]
 	path = ext/YeltsinDB
 	url = https://github.com/t1meshift/YeltsinDB
+[submodule "ext/libfort"]
+	path = ext/libfort
+	url = https://github.com/seleznevae/libfort

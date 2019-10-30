@@ -3,6 +3,8 @@ project(UDBMS)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DECHO -fsanitize=address")
+#libfort
+include_directories(ext/libfort/lib)
 # jsoncons
 include_directories(ext/jsoncons/include)
 # nlohmann json
@@ -35,6 +37,9 @@ include_directories(
 add_executable(UDBMS
         ext/nlohmann_json/nlohmann/json.hpp
         ext/fmt/src/format.cc
+        ext/libfort/lib/fort.hpp
+        ext/libfort/lib/fort.c
+        ext/libfort/lib/fort.h
         main.cpp
         exceptions.cpp exceptions.h
         parser/driver.cpp
