@@ -102,6 +102,7 @@ void  Server::ClientTask(int id) {
  //   printf("Exit socket_thread \n");
 
     close(this->connection_socket[id]);
+    this->threads[id].detach();
 }
 
 void Server::AcceptConnection(int id) {
