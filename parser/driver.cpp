@@ -53,7 +53,9 @@ void UDBMS::Driver::create_table(CreateStatement::Statement stmt)
         {
             auto type = static_cast<DataType>(col.type);
             Column api_col(col.name, type);
+            api_col.set_size(type_registry.at(type).size);
             if (col.typeLen != -1) {
+                // TODO logical size ( now works only for char(n) )
                 api_col.set_size(col.typeLen);
             }
             if (!col.flags.empty())
@@ -312,7 +314,13 @@ void UDBMS::Driver::insert(InsertStatement::Statement stmt)
         }
     }
     /*TODO check it on valid engine*/
-    Row new_row(wrapper->get_current_row());
+    std::vector<Cell> empty_cells;
+    for (const auto& col : columns)
+    {
+        empty_cells.emplace_back(col.get_type(), col.get_size());
+    }
+    Row new_row(empty_cells);
+
     for (const auto& kv : mp)
     {
         size_t index = tbl.get_index_by_name(kv.first);
