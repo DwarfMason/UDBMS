@@ -1,6 +1,7 @@
 #include <YeltsinDB/error_code.h>
 #include <YeltsinDB/constants.h>
 #include <YeltsinDB/table_page.h>
+#include <exceptions.h>
 #include "YDBDataWrapper.h"
 
 YDBDataWrapper::YDBDataWrapper(const TableMetadata &table, const std::string &filename)
@@ -20,6 +21,7 @@ YDBDataWrapper::YDBDataWrapper(const TableMetadata &table, const std::string &fi
         default:
             throw std::runtime_error("Engine exception on read, code " + std::to_string(load_status));
     }
+    __read_rows();
 }
 
 YDBDataWrapper::~YDBDataWrapper()
@@ -29,10 +31,7 @@ YDBDataWrapper::~YDBDataWrapper()
 
 void YDBDataWrapper::insert_row(const Row &row)
 {
-    YDB_TablePage* p = ydb_get_current_page(engine_);
-    if (p == nullptr)
-        throw std::runtime_error("ПРОИЗОШЁЛ ТРОЛЛИНГ, СТРАНИЦЫ НЕ БУДЕТ.........\n"
-                                 "Коммита, кстати, тоже.");
+    YDB_TablePage* p;
 
     int64_t initial_page_idx = ydb_tell_page(engine_);
     size_t initial_row_idx = curr_row_idx_;
@@ -92,7 +91,7 @@ void YDBDataWrapper::insert_row(const Row &row)
 
 void YDBDataWrapper::__read_rows()
 {
-    YDB_TablePage* p = ydb_get_current_page(engine_);
+    YDB_TablePage* p = ydb_page_clone(ydb_get_current_page(engine_));
     if (p == nullptr)
         throw std::runtime_error("ПРОИЗОШЁЛ ТРОЛЛИНГ, СТРАНИЦЫ НЕ БУДЕТ.........");
 
@@ -106,6 +105,8 @@ void YDBDataWrapper::__read_rows()
     curr_page_rowcount_ = ydb_page_row_count_get(p);
     size_t rows_read = 0;
     curr_row_idx_ = 0;
+
+    ydb_page_free(p);
 
     size_t row_size = 0; // don't count row flags
     for (const auto& c : metadata_.get_columns())
@@ -147,6 +148,9 @@ void YDBDataWrapper::__read_rows()
 
 Row YDBDataWrapper::get_current_row() const
 {
+    if (curr_page_rows_.empty())
+        throw cursor_eof_error();
+
     return curr_page_rows_.at(curr_row_idx_);
 }
 
@@ -167,13 +171,16 @@ bool YDBDataWrapper::__is_curr_page_free()
 
 void YDBDataWrapper::__commit()
 {
-    YDB_TablePage* p = ydb_get_current_page(engine_);
+    YDB_TablePage* p = ydb_page_clone(ydb_get_current_page(engine_));
     if (p == nullptr)
         throw std::runtime_error("ПРОИЗОШЁЛ ТРОЛЛИНГ, СТРАНИЦЫ НЕ БУДЕТ.........\n"
                                  "Коммита, кстати, тоже.");
 
     // Set row count in page
     ydb_page_row_count_set(p, curr_page_rows_.size());
+
+    // Rewind page
+    ydb_page_data_seek(p, 0);
 
     // Get columns count to iterate over row cells
     const size_t col_cnt = metadata_.get_columns().size();
@@ -217,7 +224,7 @@ void YDBDataWrapper::__commit()
             const void* data = cell.to_raw();
             size_t data_size = cell.get_size();
             // Write it to page
-            page_write_status = ydb_page_data_write(p, const_cast<void*>(data), data_size);
+            page_write_status = ydb_page_data_write(p, data, data_size);
             switch (page_write_status)
             {
                 case YDB_ERR_SUCCESS:
@@ -245,8 +252,11 @@ void YDBDataWrapper::next_row()
 {
     if (++curr_row_idx_ >= curr_page_rows_.size())
     {
-        ydb_next_page(engine_);
+        YDB_Error err = ydb_next_page(engine_);
         __read_rows();
+        if (err == YDB_ERR_NO_MORE_PAGES) {
+            throw cursor_eof_error();
+        }
     }
 }
 

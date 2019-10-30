@@ -16,23 +16,40 @@ Cell::Cell(DataType type, uint32_t size, const std::any& value) :
 #define THROW_ON_MISMATCH(val, sql_type) static_assert(!std::is_void_v<cell_type_v<DataType::sql_type>>,\
     "No type defined for " #sql_type);\
 static_assert(std::is_same_v<std::remove_cv_t<typeof(val)>, std::any>, "Value is not std::any");\
-if (val.type() != typeid(cell_type_v<DataType::INTEGER>)) { \
+if (val.type() != typeid(cell_type_v<DataType::sql_type>)) { \
     throw api_wrong_assign_error(val.type().name(), typeid(cell_type_v<DataType::sql_type>).name());\
 }
 
-#define THROW_IF_NOT_SQL_TYPE(val) THROW_ON_MISMATCH(val, INTEGER)\
-THROW_ON_MISMATCH(val, FLOAT)\
-THROW_ON_MISMATCH(val, CHAR)
 
 void Cell::set_value(const std::any& value)
 {
-    THROW_IF_NOT_SQL_TYPE(value);
+    switch (type_)
+    {
+        case DataType::INTEGER:
+            THROW_ON_MISMATCH(value, INTEGER);
+            break;
+        case DataType::FLOAT:
+            THROW_ON_MISMATCH(value, FLOAT);
+            break;
+        case DataType::CHAR:
+            THROW_ON_MISMATCH(value, CHAR);
+            break;
+    }
     value_ = value;
 }
 
 const void * Cell::to_raw() const
 {
-    return std::any_cast<void>(&value_);
+    switch (type_)
+    {
+        case DataType::INTEGER:
+            return std::any_cast<cell_type_v<DataType::INTEGER>>(&value_);
+        case DataType::FLOAT:
+            return std::any_cast<cell_type_v<DataType::FLOAT>>(&value_);
+        case DataType::CHAR:
+            return std::any_cast<cell_type_v<DataType::CHAR>>(value_).c_str();
+    }
+    //return std::any_cast<void>(&value_);
 }
 void Cell::from_raw(const void *data)
 {
