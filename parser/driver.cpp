@@ -265,6 +265,7 @@ void UDBMS::Driver::select(SelectStatement::Statement stmt)
     for (int k = 0; k < selectedCols.size(); ++k) {
         fTable << table.get_columns()[k].get_name();
     }
+    fTable << fort::endr;
     for (int k = 0; k < data.size(); ++k) {
         for (int j = 0; j < data[k].size(); ++j) {
             fTable  << data[k][j];
