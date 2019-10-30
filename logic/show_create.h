@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <api/Table.h>
+#include <api/TableMetadata.h>
 
 namespace Logic {
-void show_create_table(const Table& tbl);
+void show_create_table(const TableMetadata& tbl);
 }

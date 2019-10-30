@@ -1,37 +1,36 @@
 #include "Row.h"
-Row::Row(const std::vector<uint64_t> &sizes)
+
+Row::Row(const std::vector<Cell> &cells)
 {
-    sizes_ = sizes;
-    for (auto size : sizes_)
+    cells_ = cells;
+}
+bool Row::is_deleted() const
+{
+    return deleted_;
+}
+void Row::mark_as_deleted()
+{
+    deleted_ = true;
+}
+void Row::unmark_as_deleted()
+{
+    deleted_ = false;
+}
+
+void Row::set_at(size_t index, const std::any& value)
+{
+    cells_.at(index).set_value(value);
+}
+Cell Row::get_at(size_t index) const
+{
+    return cells_.at(index);
+}
+uint32_t Row::get_size() const
+{
+    uint32_t result = 0;
+    for (const auto& c : cells_)
     {
-        offsets_.push_back(row_size);
-        row_size += size;
+        result += c.get_size();
     }
-}
-void* Row::at(size_t index)
-{
-    if (data_ == nullptr)
-    {
-        throw std::runtime_error("No data in row");
-    }
-    if (index < 0 and index >= sizes_.size())
-      {
-        throw std::runtime_error("Bad column index");
-    }
-    //throw std::runtime_error("mda");
-    return static_cast<char*>(data_) + offsets_[index];
-    //return std::make_shared<char>(reinterpret_cast<char*>(data_.get()) + offsets_[index]);
-}
-void Row::set_data(void* data)
-{
-    data_ = data;
-}
-Row::~Row()
-{
-    // FIXME double-free on insert
-    //::operator delete(data_);
-}
-void *Row::get_data()
-{
-    return data_;
+    return result;
 }

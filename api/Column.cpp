@@ -1,8 +1,10 @@
 #include "Column.h"
 
-Column::Column(std::string name, data_type type)
+#include <utility>
+
+Column::Column(std::string name, DataType type)
 {
-    set_name(name);
+    set_name(std::move(name));
     set_type(type);
 }
 Column::~Column()
@@ -13,7 +15,7 @@ void Column::set_name(std::string name)
 {
     name_ = std::move(name);
 }
-void Column::set_type(data_type type)
+void Column::set_type(DataType type)
 {
     type_ = type;
 }
@@ -29,7 +31,7 @@ std::string Column::get_name() const
 {
     return name_;
 }
-const data_type &Column::get_type() const
+const DataType &Column::get_type() const
 {
     return type_;
 }

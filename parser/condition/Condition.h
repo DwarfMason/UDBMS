@@ -3,8 +3,9 @@
 #include <string>
 #include <functional>
 #include <map>
-
-#include "api/Table.h"
+#include <api/DataType.h>
+#include <api/TableMetadata.h>
+#include <api/Row.h>
 #include "exceptions.h"
 
 struct Node {
@@ -13,29 +14,29 @@ struct Node {
     Node *left = nullptr;
     Node *right = nullptr;
     std::string value;
-    data_type type;
+    DataType type;
 };
 
 
 bool eq(Node *l, Node *r){
-    if (l->type == data_type::FLOAT && r->type == data_type::FLOAT){
+    if (l->type == DataType::FLOAT && r->type == DataType::FLOAT){
 
     }
-    else if (l->type == data_type::INTEGER && r->type == data_type::FLOAT){
+    else if (l->type == DataType::INTEGER && r->type == DataType::FLOAT){
 
     }
-    else if (l->type == data_type::FLOAT && r->type == data_type::INTEGER){
+    else if (l->type == DataType::FLOAT && r->type == DataType::INTEGER){
 
     }
-    else if (l->type == data_type::INTEGER && r->type == data_type::INTEGER){
+    else if (l->type == DataType::INTEGER && r->type == DataType::INTEGER){
 
     }
-    else if (l->type == data_type::CHAR && r->type == data_type::CHAR){
+    else if (l->type == DataType::CHAR && r->type == DataType::CHAR){
 
     } else throw custom_exception(305,"invalid type expresion");
 }
 
-Node *calculate(Node *n,const Table& table,Row& row){
+Node *calculate(Node *n,const TableMetadata& table, Row& row){
     if(n->isOperator){
         if (n->value == "<"){
             if (!n->left->isOperator){
@@ -53,16 +54,16 @@ Node *calculate(Node *n,const Table& table,Row& row){
         for (int i = 0; i < columns.size(); ++i) {
             if (n->value == columns[i].get_name()) {
                 n->type = columns[i].get_type();
-                if (n->type == data_type::INTEGER) {
-                    n->value = std::to_string(*static_cast<int *>(row.at(i)));
+                if (n->type == DataType::INTEGER) {
+                    n->value = std::to_string(row.get_at(i).get_value<cell_type_v<DataType::INTEGER>>());
                     n->isVariable = false;
                 }
-                if (n->type == data_type::CHAR) {
-                    n->value = std::to_string(*static_cast<char *>(row.at(i)));
+                if (n->type == DataType::CHAR) {
+                    n->value = row.get_at(i).get_value<cell_type_v<DataType::CHAR>>();
                     n->isVariable = false;
                 }
-                if (n->type == data_type::FLOAT) {
-                    n->value = std::to_string(*static_cast<float *>(row.at(i)));
+                if (n->type == DataType::FLOAT) {
+                    n->value = std::to_string(row.get_at(i).get_value<cell_type_v<DataType::FLOAT>>());
                     n->isVariable = false;
                 }
                 return n;

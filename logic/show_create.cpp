@@ -1,7 +1,8 @@
+#include <iostream>
 #include <fmt/format.h>
 #include "show_create.h"
 
-void Logic::show_create_table(const Table &tbl)
+void Logic::show_create_table(const TableMetadata &tbl)
 {
     const std::string output_tpl = "*************************** 1. row ***************************\n"
                                    "       Table: {}\n"

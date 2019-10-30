@@ -9,8 +9,8 @@
 
 #include "scanner.hpp"
 #include "parser.tab.hh"
-#include "api/Cursor.h"
-#include <api/crud.h>
+#include "api/v0/Cursor.h"
+#include <api/v0/crud.h>
 #include <parser/statement/InsertStatement.h>
 #include <parser/statement/DeleteStatement.h>
 #include <parser/statement/SelectStatement.h>
@@ -74,7 +74,7 @@ private:
             static void* createChar(std::string val);
             static void* createInt(std::string val);
         public:
-            static void* createPointer(std::string str, data_type type);
+            static void* createPointer(std::string str, DataType type);
 
             static auto getFloat(void *v){return *static_cast<float*>(v);}
             static char* getChar(void *v,size_t size = 1){

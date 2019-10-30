@@ -1,6 +1,8 @@
 #pragma once
 
-#include <jsoncons/json.hpp>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 class Constraints
 {
@@ -18,7 +20,16 @@ private:
     bool index_ = false;
 };
 
-JSONCONS_GETTER_SETTER_NAMED_TRAITS_DECL(Constraints,
-                                         (is_not_null, set_not_null, "not_null"),
-                                         (is_unique_key, set_unique, "unique"),
-                                         (is_index, set_index, "index"))
+void to_json(json& j, const Constraints& c) {
+    j = json{
+        {"not_null", c.is_not_null()},
+        {"unique", c.is_unique_key()},
+        {"index", c.is_index()}
+    };
+}
+
+void from_json(const json& j, Constraints& c) {
+    c.set_not_null(j.at("not_null").get<bool>());
+    c.set_unique(j.at("unique").get<bool>());
+    c.set_index(j.at("index").get<bool>());
+}

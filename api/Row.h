@@ -1,19 +1,26 @@
 #pragma once
 
-#include <memory>
 #include <vector>
+#include <cstdint>
+#include <api/Cell.h>
 
+/**
+ * @brief A row class that stores Cell objects.
+ *
+ * Has getter and setter for specific cell.
+ */
 class Row
 {
 public:
-    explicit Row(const std::vector<uint64_t>& sizes);
-    ~Row();
-    void* get_data();
-    void set_data(void* data);
-    void* at(size_t index);
-
+    explicit Row(const std::vector<Cell>& cells);
+    [[nodiscard]] bool is_deleted() const;
+    void mark_as_deleted();
+    void unmark_as_deleted();
+    void set_at(size_t index, const std::any& value);
+    [[nodiscard]] Cell get_at(size_t index) const;
+    [[nodiscard]] uint32_t get_size() const;
 private:
-    void* data_ = nullptr;
-    std::vector<uint64_t> sizes_, offsets_;
-    uint64_t row_size = 0;
+    std::vector<Cell> cells_;
+    bool deleted_;
+    // Further flags here...
 };
