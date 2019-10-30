@@ -7,7 +7,7 @@
 
 #include "driver.hpp"
 #include "statement/BaseStatement.h"
-
+#include "ext/libfort/lib/fort.hpp"
 UDBMS::Driver::~Driver()
 {
    delete(scanner);
@@ -258,12 +258,18 @@ void UDBMS::Driver::select(SelectStatement::Statement stmt)
 
 
     /*output*/
+    fort::char_table fTable;
+    fTable << fort::header;
+    for (int k = 0; k < selectedCols.size(); ++k) {
+        fTable << table.get_columns()[k].get_name();
+    }
     for (int k = 0; k < data.size(); ++k) {
         for (int j = 0; j < data[k].size(); ++j) {
-            std::cout << std::setw(20) << std::right << data[k][j];
+            fTable  << data[k][j];
         }
-        std::cout << std::endl;
+        fTable << fort::endr;
     }
+    std::cout << fTable.to_string();
     delete wrapper;
 }
 
