@@ -9,8 +9,6 @@
 
 #include "scanner.hpp"
 #include "parser.tab.hh"
-#include "api/v0/Cursor.h"
-#include <api/v0/crud.h>
 #include <parser/statement/InsertStatement.h>
 #include <parser/statement/DeleteStatement.h>
 #include <parser/statement/SelectStatement.h>
@@ -67,26 +65,6 @@ private:
 
    UDBMS::DParse  *parser  = nullptr;
    UDBMS::Scanner *scanner = nullptr;
-
-    class ValueManager{
-        private:
-            static void* createFoat(std::string val);
-            static void* createChar(std::string val);
-            static void* createInt(std::string val);
-        public:
-            static void* createPointer(std::string str, DataType type);
-
-            static auto getFloat(void *v){return *static_cast<float*>(v);}
-            static char* getChar(void *v,size_t size = 1){
-                char * res = new char[size+1];
-                for (int i = 0; i < size; ++i) {
-                    res[i] = *(static_cast<char*>(v)+i);
-                }
-                res[size] = '\0';
-                return res;
-            ;}
-            static int getInt(void *v){return *static_cast<int*>(v);}
-    };
 
 };
 

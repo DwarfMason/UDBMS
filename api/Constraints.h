@@ -20,16 +20,5 @@ private:
     bool index_ = false;
 };
 
-void to_json(json& j, const Constraints& c) {
-    j = json{
-        {"not_null", c.is_not_null()},
-        {"unique", c.is_unique_key()},
-        {"index", c.is_index()}
-    };
-}
-
-void from_json(const json& j, Constraints& c) {
-    c.set_not_null(j.at("not_null").get<bool>());
-    c.set_unique(j.at("unique").get<bool>());
-    c.set_index(j.at("index").get<bool>());
-}
+void to_json(json& j, const Constraints& c);
+void from_json(const json& j, Constraints& c);

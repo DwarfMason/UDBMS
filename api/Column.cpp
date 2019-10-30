@@ -2,6 +2,8 @@
 
 #include <utility>
 
+using json = nlohmann::json;
+
 Column::Column(std::string name, DataType type)
 {
     set_name(std::move(name));
@@ -44,3 +46,18 @@ const Constraints &Column::get_constraints() const
     return constraints_;
 }
 
+void to_json(json& j, const Column& c) {
+    j = json{
+        {"name", c.get_name()},
+        {"type", c.get_type()},
+        {"size", c.get_size()},
+        {"constraints", c.get_constraints()},
+    };
+}
+
+void from_json(const json& j, Column& c) {
+    c.set_name(j.at("name").get<std::string>());
+    c.set_type(j.at("type").get<DataType>());
+    c.set_size(j.at("size").get<uint32_t>());
+    c.set_constraints(j.at("constraints").get<Constraints>());
+}

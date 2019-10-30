@@ -33,13 +33,13 @@ include_directories(
         ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(UDBMS
+        ext/nlohmann_json/nlohmann/json.hpp
         ext/fmt/src/format.cc
         main.cpp
         exceptions.cpp exceptions.h
         parser/driver.cpp
         ${FLEX_flexer_OUTPUTS}
         ${BISON_bison_parser_OUTPUTS}
-        api/v0/crud.cpp api/v0/crud.h
         constants.h
         parser/statement/BaseStatement.h
         parser/statement/CreateStatement.h
@@ -55,7 +55,13 @@ add_executable(UDBMS
 
         api/TableMetadata.cpp api/TableMetadata.h
         api/Column.cpp api/Column.h
-        api/Constraints.cpp api/Constraints.h api/Row.cpp api/Row.h api/Cell.cpp api/Cell.h api/data_wrap/BaseDataWrapper.cpp api/data_wrap/BaseDataWrapper.h api/data_wrap/YDBDataWrapper.cpp api/data_wrap/YDBDataWrapper.h api/TableFileWorker.cpp api/TableFileWorker.h)
+        api/Constraints.cpp api/Constraints.h
+        api/Row.cpp api/Row.h
+        api/Cell.cpp api/Cell.h
+        api/data_wrap/BaseDataWrapper.cpp api/data_wrap/BaseDataWrapper.h
+        api/data_wrap/YDBDataWrapper.cpp api/data_wrap/YDBDataWrapper.h
+        api/TableFileWorker.cpp api/TableFileWorker.h
+        api/DataType.cpp api/DataType.h)
 
 target_link_libraries(UDBMS INTERFACE stdc++fs)
 target_link_libraries(UDBMS PRIVATE pthread)

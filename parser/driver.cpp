@@ -104,7 +104,7 @@ void UDBMS::Driver::create_table(CreateStatement::Statement stmt)
                 col_map.at(col).set_constraints(current_cts);
             }
         }
-        TableMetadata tbl = TableFileWorker::create_table(stmt.tableName);
+        TableMetadata tbl = TableFileWorker::create_table(stmt.tableName, cols_vec);
         std::cout << "Table created." << std::endl;
     }
     catch (sql_error& e) {
@@ -124,7 +124,7 @@ void UDBMS::Driver::drop_table(DropTableStatement::Statement stmt)
     }
     catch (sql_error& e)
     {
-       table.load_data(); std::cerr << e.msg() << std::endl;
+       std::cerr << e.msg() << std::endl;
     }
 }
 void UDBMS::Driver::show_create(ShowCreateStatement::Statement stmt)
@@ -300,7 +300,7 @@ void UDBMS::Driver::insert(InsertStatement::Statement stmt)
                     val = stmt.value[i];
                     break;
             }
-            mp.insert_or_assign(stmt.cols[i], val);
+            mp.insert_or_assign(stmt.cols[i], std::move(val));
         } else {
             throw sql_error(303,"no such column");
         }
@@ -317,51 +317,3 @@ void UDBMS::Driver::insert(InsertStatement::Statement stmt)
     delete wrapper;
 }
 
-
-
-
-void *UDBMS::Driver::ValueManager::createFoat(std::string val)
-{
-    float *p;
-    try{
-        p = new float(std::stof(strdup(val.c_str())));
-    } catch (...) {
-        throw custom_exception(304,"bad value type");
-    }
-
-    return static_cast<void*>(p);
-}
-void *UDBMS::Driver::ValueManager::createChar(std::string val)
-{
-    char *p;
-    try{
-        p = strdup(val.c_str());
-    } catch (...) {
-        throw custom_exception(304,"bad value type");
-    }
-
-    return static_cast<void*>(p);
-}
-void *UDBMS::Driver::ValueManager::createInt(std::string val)
-{
-    int *p;
-    try{
-        p = new int(std::stoi(strdup(val.c_str())));
-    } catch (...) {
-        throw custom_exception(304,"bad value type");
-    }
-
-    return static_cast<void*>(p);
-}
-void *UDBMS::Driver::ValueManager::createPointer(std::string str, DataType type)
-{
-    if(DataType::INTEGER == type){
-        return createInt(str);
-    }
-    if(DataType::FLOAT == type){
-        return createFoat(str);
-    }
-    if(DataType::CHAR == type){
-        return createChar(str);
-    }
-}

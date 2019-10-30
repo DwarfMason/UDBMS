@@ -2,6 +2,7 @@
 // Created by igor on 24.10.19.
 //
 
+#include <cstring>
 #include "Server.h"
 
 std::mutex m;

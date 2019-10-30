@@ -1,7 +1,6 @@
 #include <YeltsinDB/error_code.h>
 #include <YeltsinDB/constants.h>
 #include <YeltsinDB/table_page.h>
-
 #include "YDBDataWrapper.h"
 
 YDBDataWrapper::YDBDataWrapper(const TableMetadata &table, const std::string &filename)
@@ -213,10 +212,10 @@ void YDBDataWrapper::__commit()
         {
             // Get cell value and physical size
             const auto& cell = row.get_at(i);
-            void* data = cell.to_raw();
+            const void* data = cell.to_raw();
             size_t data_size = cell.get_size();
             // Write it to page
-            page_write_status = ydb_page_data_write(p, data, data_size);
+            page_write_status = ydb_page_data_write(p, const_cast<void*>(data), data_size);
             switch (page_write_status)
             {
                 case YDB_ERR_SUCCESS:
