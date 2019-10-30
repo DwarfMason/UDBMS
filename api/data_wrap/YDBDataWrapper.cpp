@@ -15,6 +15,8 @@ YDBDataWrapper::YDBDataWrapper(const TableMetadata &table, const std::string &fi
                 throw std::runtime_error("Engine exception on create, code " + std::to_string(load_status));
             }
             break;
+        case YDB_ERR_SUCCESS:
+            break;
         default:
             throw std::runtime_error("Engine exception on read, code " + std::to_string(load_status));
     }
