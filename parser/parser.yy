@@ -154,7 +154,7 @@ stmt
 
 /*create Table*/
 create_stmt:
-    CREATE TABLE NAME '(' create_params ')' {$5.tableName = $3; $$ = $5; CreateStatement::get_str($5);}
+    CREATE TABLE NAME '(' create_params ')' {$5.tableName = $3; $$ = $5;}
     ;
 
 create_params               /*Statement*/

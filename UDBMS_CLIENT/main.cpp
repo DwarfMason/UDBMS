@@ -3,16 +3,17 @@
 #include <gtest/gtest.h>
 
 /// TO START TESTING CHANGE TESTING DEFINE IN CLIENT.h TO TRUE
-#define PORT 2078
+#define PORT 2077
 
 
-int main()
+int main(int argc, char **argv)
 {
 
     Client cl_local;
     cl_local.ClientInit(PORT);
     if (TESTING) {
         env = MyTestEnvironment(&cl_local);
+        ::testing::InitGoogleTest(&argc, argv);
         RUN_ALL_TESTS();
     }
     return 0;
