@@ -23,6 +23,5 @@ int main() {
 
     /*for (int i = 0; i < 35; i++)
         tid[i].join();*/
-        while (true){};
 }
 

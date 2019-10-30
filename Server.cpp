@@ -2,7 +2,7 @@
 // Created by igor on 24.10.19.
 //
 
-#include <cstring>
+#include <memory.h>
 #include "Server.h"
 
 std::mutex m;
@@ -23,20 +23,24 @@ void Server::ServerInit(int port) {
     else
         printf("Error\n");*/
 
-    this->connection_socket.resize(MAX_CONNECTIONS);
+    this->connection_socket.resize(400);
 
-    for (int i = 0; i < MAX_CONNECTIONS; i++)
-        /*this->threads.emplace_back(std::thread(this->ClientTask, i));*/
-        this->threads.emplace_back(std::thread(([i, this](){this->ClientTask(i);})));
+    for (int i = 0; i < MAX_CONNECTIONS; i++) {
+        this->threads.emplace_back(std::thread(([i, this]() { this->ClientTask(i); })));
+        this->_created_connections++;
+    }
 
-    for (int i = 0; i < MAX_CONNECTIONS; i++)
-        this->threads[i].join();
-
+    while (true)
+        if (this->_live_connections < MAX_CONNECTIONS) {
+            int i = this->_created_connections;
+            this->threads.emplace_back(std::thread(([i, this]() { this->ClientTask(i); })));
+            this->_created_connections++;
+        }
 }
 
 void  Server::ClientTask(int id) {
+    this->_live_connections++;
     this->AcceptConnection(id);
-
     while(true){
         std::stringstream buffer;
 
@@ -103,6 +107,7 @@ void  Server::ClientTask(int id) {
  //   printf("Exit socket_thread \n");
 
     close(this->connection_socket[id]);
+    this->_live_connections--;
     this->threads[id].detach();
 }
 
