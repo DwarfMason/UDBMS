@@ -207,7 +207,6 @@ void UDBMS::Driver::update(UpdateStatement::Statement stmt)
 
 void UDBMS::Driver::select(SelectStatement::Statement stmt)
 {
-
     TableMetadata table = TableFileWorker::load_table(stmt.name);
     BaseDataWrapper* wrapper = TableFileWorker::load_table_data(table);
     std::vector<Column> columns = table.get_columns();
@@ -261,19 +260,20 @@ void UDBMS::Driver::select(SelectStatement::Statement stmt)
 
 
     /*output*/
-    fort::char_table fTable;
-    fTable << fort::header;
-    for (int k = 0; k < selectedCols.size(); ++k) {
-        fTable << table.get_columns()[k].get_name();
-    }
-    fTable << fort::endr;
-    for (int k = 0; k < data.size(); ++k) {
-        for (int j = 0; j < data[k].size(); ++j) {
-            fTable  << data[k][j];
+        fort::char_table fTable;
+        fTable << fort::header;
+        for (int k = 0; k < selectedCols.size(); ++k) {
+            fTable << table.get_columns()[selectedCols[k]].get_name();
         }
         fTable << fort::endr;
-    }
-    std::cout << fTable.to_string();
+        for (int k = 0; k < data.size(); ++k) {
+            for (int j = 0; j < data[k].size(); ++j) {
+                fTable << data[k][j];
+            }
+            fTable << fort::endr;
+        }
+        std::cout << fTable.to_string();
+
     delete wrapper;
 }
 
