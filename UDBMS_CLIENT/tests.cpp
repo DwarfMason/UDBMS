@@ -165,3 +165,57 @@ TEST(BASE_FUNCTIONALITY, LOTS_OF_COLUMNS_CASE){
                                                  ");"));
     TestDBMS("drop table a;");
 }
+
+
+TEST(DATA_FUNCTIONALITY, INSERT_VALUE_CASE){
+    TestDBMS("create table a(id integer);");
+    TestDBMS("insert into a(id) values(1)");
+    EXPECT_TRUE(TestDBMS("select id from a;", "+----+\n"
+                                              "| id |\n"
+                                              "+----+\n"
+                                              "| 1  |\n"
+                                              "+----+"));
+    TestDBMS("drop table a;");
+}
+
+TEST(DATA_FUNCTIONALITY, NO_COLUMN_CASE){
+    TestDBMS("create table a(id integer);");
+    TestDBMS("insert into a(id) values(1)");
+    EXPECT_TRUE(TestDBMS("select b from a;", "303:No such column!"));
+    TestDBMS("drop table a;");
+}
+
+TEST(DATA_FUNCTIONALITY, MULTI_INSERT_AND_WILDCART_CASE){
+    TestDBMS("create table a( id integer, a integer, b integer);");
+    TestDBMS("insert into a (id, a) values (1, 2);");
+    EXPECT_TRUE(TestDBMS("select * from a;", "+----+---+---+\n"
+                                                      "| id | a | b |\n"
+                                                      "+----+---+---+\n"
+                                                      "| 1  | 2 | 0 |\n"
+                                                      "+----+---+---+"));
+    TestDBMS("drop table a;");
+}
+
+TEST(DATA_FUNCTIONALITY, REPOSITION_OF_COLUMN_NAMES_CASE){
+    TestDBMS("create table a( id integer, a integer, b integer);");
+    TestDBMS("insert into a (id, a) values (1, 2);");
+    EXPECT_TRUE(TestDBMS("select a,id from a;", "+----+---+---+\n"
+                                             "| a | id | b |\n"
+                                             "+----+---+---+\n"
+                                             "| 2  | 1 | 0 |\n"
+                                             "+----+---+---+"));
+    TestDBMS("drop table a;");
+}
+
+TEST(DATA_FUNCTIONALITY, SEVERAL_SELECT_COLUMNS_IN_SELECT_CASE){
+    TestDBMS("create table a( id integer, a integer, b integer);");
+    TestDBMS("insert into a (id, a) values (1, 2);");
+    EXPECT_TRUE(TestDBMS("select id, a from a;", "+----+---+---+\n"
+                                                "| id | a | b |\n"
+                                                "+----+---+---+\n"
+                                                "| 1  | 2 | 0 |\n"
+                                                "+----+---+---+"));
+    TestDBMS("drop table a;");
+}
+
+
