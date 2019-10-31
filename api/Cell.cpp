@@ -5,6 +5,18 @@ Cell::Cell(DataType type, uint32_t size)
 {
     type_ = type;
     size_ = size;
+    switch (type_)
+    {
+        case DataType::INTEGER:
+            set_value(0);
+            break;
+        case DataType::FLOAT:
+            set_value(0.0f);
+            break;
+        case DataType::CHAR:
+            set_value("");
+            break;
+    }
 }
 
 Cell::Cell(DataType type, uint32_t size, const std::any& value) :

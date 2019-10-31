@@ -99,6 +99,7 @@ void YDBDataWrapper::__read_rows()
     size_t page_mem_read = 0;
 
     char data[page_mem_size];
+    ydb_page_data_seek(p, 0);
     ydb_page_data_read(p, data, sizeof(data));
 
     curr_page_rows_.clear();
