@@ -115,5 +115,5 @@ void Server::AcceptConnection(int id) {
     struct sockaddr_storage server_storage;
     socklen_t addr_size;
     this->connection_socket[id] = accept(this->_server_sock, (struct sockaddr *) &server_storage, &addr_size);
-/*    FD_SET(this->connection_socket[id],&this->readset);*/
+    /*FD_SET(this->connection_socket[id],&this->readset);*/
 }
