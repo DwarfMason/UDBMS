@@ -65,23 +65,22 @@ const void * Cell::to_raw() const
 }
 void Cell::from_raw(const void *data)
 {
-    void *d = malloc(size_);
+    char d[size_ + 1];
     memcpy(d, data, size_);
     switch (type_)
     {
         case DataType::INTEGER:
-            value_ = *static_cast<cell_type_v<DataType::INTEGER>*>(d);
+            value_ = *reinterpret_cast<cell_type_v<DataType::INTEGER>*>(d);
             break;
         case DataType::FLOAT:
-            value_ = *static_cast<cell_type_v<DataType::FLOAT>*>(d);
+            value_ = *reinterpret_cast<cell_type_v<DataType::FLOAT>*>(d);
             break;
         case DataType::CHAR:
-            value_ = *static_cast<cell_type_v<DataType::CHAR>*>(d);
+            value_ = std::string(d);
             break;
         default:
             throw std::runtime_error("from_raw() failed");
     }
-    free(d);
 }
 
 uint32_t Cell::get_size() const

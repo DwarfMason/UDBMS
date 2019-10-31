@@ -56,9 +56,9 @@ std::string TableMetadata::get_create_query() const
         std::string cts_str = constraint_args.str();
 
         std::string type_str = type_registry.at(col.get_type()).name;
-        if (col.get_size() > 0)
+        if (col.get_logic_size() > 0)
         {
-            type_str += "(" + std::to_string(col.get_size()) + ")";
+            type_str += "(" + std::to_string(col.get_logic_size()) + ")";
         }
 
         create_args << fmt::format(arg_tpl,

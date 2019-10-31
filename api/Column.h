@@ -15,16 +15,18 @@ public:
     ~Column();
     [[nodiscard]] std::string get_name() const;
     [[nodiscard]] const DataType& get_type() const;
-    [[nodiscard]] uint32_t get_size() const;
+    [[nodiscard]] uint32_t get_phys_size() const;
+    [[nodiscard]] uint32_t get_logic_size() const;
     [[nodiscard]] const Constraints& get_constraints() const;
     void set_name(std::string name);
     void set_type(DataType type);
-    void set_size(uint32_t size);
+    void set_logic_size(uint32_t size);
     void set_constraints(Constraints cts);
 private:
     std::string name_;
     DataType type_;
-    uint32_t size_ = 0;
+    uint32_t phys_size_ = 0;
+    uint32_t logic_size_ = 0;
     Constraints constraints_;
 };
 

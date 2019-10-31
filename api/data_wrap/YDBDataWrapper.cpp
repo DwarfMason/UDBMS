@@ -112,7 +112,7 @@ void YDBDataWrapper::__read_rows()
     size_t row_size = 0; // don't count row flags
     for (const auto& c : metadata_.get_columns())
     {
-        row_size += c.get_size();
+        row_size += c.get_phys_size();
     }
 
     while (rows_read != curr_page_rowcount_)
@@ -131,8 +131,8 @@ void YDBDataWrapper::__read_rows()
 
         for (const auto& c : metadata_.get_columns())
         {
-            Cell cell(c.get_type(), c.get_size());
-            char cell_val_raw[c.get_size()];
+            Cell cell(c.get_type(), c.get_phys_size());
+            char cell_val_raw[c.get_phys_size()];
             memcpy(cell_val_raw, data + page_mem_read, sizeof(cell_val_raw));
             page_mem_read += sizeof(cell_val_raw);
             cell.from_raw(cell_val_raw);
