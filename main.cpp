@@ -3,7 +3,7 @@
 #include <fstream>
 #include "Server.h"
 
-#define PORT 2078
+#define PORT 2077
 
 int main() {
     FILE *config;
@@ -23,6 +23,5 @@ int main() {
 
     /*for (int i = 0; i < 35; i++)
         tid[i].join();*/
-        while (true){};
 }
 

@@ -176,10 +176,10 @@ int getPosByName(const std::vector<Column> &cols,const std::string &name){
 void UDBMS::Driver::update(UpdateStatement::Statement stmt)
 {
 
-    std::cout << "Table to update: " << stmt.tableToUpdate << '\n';
+    /*std::cout << "Table to update: " << stmt.tableToUpdate << '\n';
     std::cout << "new value: " << stmt.newValue << '\n';
     std::cout << "Column name" << stmt.columnName << '\n';
-    std::cout << "where: " << stmt.expr.first << " = " << stmt.expr.second << '\n';
+    std::cout << "where: " << stmt.expr.first << " = " << stmt.expr.second << '\n';*/
 
     auto table = TableFileWorker::load_table(stmt.tableToUpdate);
     BaseDataWrapper* wrapper = TableFileWorker::load_table_data(table);
@@ -194,6 +194,7 @@ void UDBMS::Driver::update(UpdateStatement::Statement stmt)
                 // TODO wrapper->update_current_row(std::map with key and value)
             }
             wrapper->next_row();
+            std::cout << "Updated.\n";
         }
         catch (cursor_eof_error& err) {
             break;
@@ -265,6 +266,7 @@ void UDBMS::Driver::select(SelectStatement::Statement stmt)
     for (int k = 0; k < selectedCols.size(); ++k) {
         fTable << table.get_columns()[k].get_name();
     }
+    fTable << fort::endr;
     for (int k = 0; k < data.size(); ++k) {
         for (int j = 0; j < data[k].size(); ++j) {
             fTable  << data[k][j];
@@ -277,13 +279,13 @@ void UDBMS::Driver::select(SelectStatement::Statement stmt)
 
 void UDBMS::Driver::insert(InsertStatement::Statement stmt)
 {
-    std::cout << "name: " << stmt.name << '\n';
+    /*std::cout << "name: " << stmt.name << '\n';
     for (const auto & col : stmt.cols) {
         std::cout << "Column to insert:" << col <<'\n';
     }
     for (const auto & i : stmt.value) {
         std::cout << "value to insert:" << i <<'\n';
-    }
+    }*/
 
     TableMetadata tbl = TableFileWorker::load_table(stmt.name);
     BaseDataWrapper* wrapper = TableFileWorker::load_table_data(tbl);
@@ -309,6 +311,7 @@ void UDBMS::Driver::insert(InsertStatement::Statement stmt)
                     break;
             }
             mp.insert_or_assign(stmt.cols[i], std::move(val));
+            std::cout << "inserted.\n";
         } else {
             throw sql_error(303,"no such column");
         }

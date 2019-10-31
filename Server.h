@@ -15,7 +15,7 @@
 #include <thread>
 #include <mutex>
 
-#define MAX_CONNECTIONS 35
+#define MAX_CONNECTIONS 10
 #define MIN(a, b)       ((a) < (b) ? (a) : (b))
 
 class Server {
@@ -28,7 +28,8 @@ public:
 
 private:
     int _server_sock;
-    /*fd_set readset;*/
+    int _live_connections = 0;
+    int _created_connections = 0;
     std::vector<int> connection_socket;
     std::vector<std::thread> threads;
     int _hostshort;
