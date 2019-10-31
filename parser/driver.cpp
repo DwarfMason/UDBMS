@@ -224,7 +224,7 @@ void UDBMS::Driver::select(SelectStatement::Statement stmt)
                 if(pose != -1){
                     selectedCols.push_back(pose);
                 }else{
-                    throw sql_error(303,"no such column");
+                    throw sql_error(303,"No such column!");
                 }
             }
         } else {
@@ -311,7 +311,7 @@ void UDBMS::Driver::insert(InsertStatement::Statement stmt)
                     break;
             }
             mp.insert_or_assign(stmt.cols[i], std::move(val));
-            std::cout << "inserted.\n";
+            std::cout << "Inserted.\n";
         } else {
             throw sql_error(303,"no such column");
         }

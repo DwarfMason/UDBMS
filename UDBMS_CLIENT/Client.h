@@ -12,7 +12,7 @@
 #include <iostream>
 #include <memory.h>
 
-#define TESTING true
+#define TESTING false
 
 class Client {
 public:
