@@ -12,7 +12,8 @@
 #include <iostream>
 #include <memory.h>
 
-#define TESTING false
+#define TESTING true
+#define CONSISTENCY_TEST false
 
 class Client {
 public:

@@ -274,7 +274,6 @@ select_stmt             /*SelectStatement::Statement*/
               $$ = SelectStatement::Statement();
               $$.name = $4;
               $$.selector = $2;
-              driver.select($$);
           }
     ;
 
