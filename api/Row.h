@@ -21,6 +21,6 @@ public:
     [[nodiscard]] uint32_t get_size() const;
 private:
     std::vector<Cell> cells_;
-    bool deleted_;
+    bool deleted_ = false;
     // Further flags here...
 };

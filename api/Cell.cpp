@@ -14,7 +14,9 @@ Cell::Cell(DataType type, uint32_t size)
             set_value(0.0f);
             break;
         case DataType::CHAR:
-            set_value(std::string());
+            std::string tmp;
+            tmp.insert(0, size_, '\0');
+            set_value(tmp);
             break;
     }
 }
@@ -35,6 +37,7 @@ if (val.type() != typeid(cell_type_v<DataType::sql_type>)) { \
 
 void Cell::set_value(const std::any& value)
 {
+    std::string strval, beforeval;
     switch (type_)
     {
         case DataType::INTEGER:
@@ -45,7 +48,14 @@ void Cell::set_value(const std::any& value)
             break;
         case DataType::CHAR:
             THROW_ON_MISMATCH(value, CHAR);
-            break;
+            if (!value_.has_value()) break;
+
+            strval = std::any_cast<std::string>(value);
+            beforeval = std::any_cast<std::string>(value_);
+
+            value_ = beforeval.replace(0, std::min(strval.size(), (size_t) size_),
+                strval.substr(0, std::min(strval.size(), (size_t) size_)));
+            return;
     }
     value_ = value;
 }
@@ -59,9 +69,8 @@ const void * Cell::to_raw() const
         case DataType::FLOAT:
             return std::any_cast<cell_type_v<DataType::FLOAT>>(&value_);
         case DataType::CHAR:
-            return std::any_cast<cell_type_v<DataType::CHAR>>(value_).c_str();
+            return std::any_cast<cell_type_v<DataType::CHAR>>(&value_)->c_str();
     }
-    //return std::any_cast<void>(&value_);
 }
 void Cell::from_raw(const void *data)
 {
@@ -76,7 +85,7 @@ void Cell::from_raw(const void *data)
             value_ = *reinterpret_cast<cell_type_v<DataType::FLOAT>*>(d);
             break;
         case DataType::CHAR:
-            value_ = std::string(d);
+            value_ = std::string{d, size_};
             break;
         default:
             throw std::runtime_error("from_raw() failed");
