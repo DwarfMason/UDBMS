@@ -64,7 +64,7 @@ void YDBDataWrapper::insert_row(const Row &row)
                 ydb_page_flags_set(p, 0);
                 ydb_page_row_count_set(p, 0);
                 ydb_append_page(engine_, p);
-                break;
+                continue;
             default:
                 throw std::runtime_error("Unhandled error, code" + std::to_string(next_page_status));
         }
@@ -76,8 +76,6 @@ void YDBDataWrapper::insert_row(const Row &row)
         {
             free_mem_offset += sizeof(YDB_Flags) + page_row.get_size();
         }
-        // Count size of row to be inserted
-        insert_row_size = sizeof(YDB_Flags) + row.get_size();
     };
 
     curr_page_rows_.push_back(row);
