@@ -14,7 +14,7 @@ Cell::Cell(DataType type, uint32_t size)
             set_value(0.0f);
             break;
         case DataType::CHAR:
-            set_value("");
+            set_value(std::string());
             break;
     }
 }
