@@ -33,58 +33,38 @@ void YDBDataWrapper::insert_row(const Row &row)
 {
     YDB_TablePage* p;
 
-    int64_t initial_page_idx = ydb_tell_page(engine_);
-    size_t initial_row_idx = curr_row_idx_;
     const size_t col_cnt = metadata_.get_columns().size();
 
     uint32_t free_mem_offset;
     uint32_t insert_row_size;
 
-    // Count current page data size
+    // Read the last page
+    ydb_seek_to_end(engine_);
+    __read_rows();
+
+    // Count last page data size
     free_mem_offset = 0;
     for (const auto& page_row : curr_page_rows_)
     {
         free_mem_offset += sizeof(YDB_Flags) + page_row.get_size();
     }
+
     // Count size of row to be inserted
     insert_row_size = sizeof(YDB_Flags) + row.get_size();
 
-    while (free_mem_offset + insert_row_size > YDB_TABLE_PAGE_SIZE - 11) // FIXME remove magic numbers
-    {
-        // Next page
-        YDB_Error next_page_status = ydb_next_page(engine_);
-        YDB_Flags flags;
-        switch (next_page_status)
-        {
-            case YDB_ERR_SUCCESS:
-                break;
-            case YDB_ERR_NO_MORE_PAGES:
-                // Allocate a new page and return;
-                p = ydb_page_alloc(YDB_TABLE_PAGE_SIZE - 11); // FIXME magic numbers
-                ydb_page_flags_set(p, 0);
-                ydb_page_row_count_set(p, 0);
-                ydb_append_page(engine_, p);
-                continue;
-            default:
-                throw std::runtime_error("Unhandled error, code" + std::to_string(next_page_status));
-        }
-        __read_rows();
+    // If there's not enough space to insert, allocate a new page
+    if (free_mem_offset + insert_row_size > YDB_TABLE_PAGE_SIZE - YDB_v1_page_data_offset) {
+        p = ydb_page_alloc(YDB_TABLE_PAGE_SIZE - YDB_v1_page_data_offset);
+        ydb_page_flags_set(p, 0);
+        ydb_page_row_count_set(p, 0);
+        ydb_append_page(engine_, p);
+    }
 
-        // Count current page data size
-        free_mem_offset = 0;
-        for (const auto& page_row : curr_page_rows_)
-        {
-            free_mem_offset += sizeof(YDB_Flags) + page_row.get_size();
-        }
-    };
-
+    // Write to storage
     curr_page_rows_.push_back(row);
     __commit();
 
-    // Go back
-    ydb_seek_page(engine_, initial_page_idx);
-    __read_rows();
-    curr_row_idx_ = initial_page_idx;
+    // Notice that wrapper is on the last page
 }
 
 void YDBDataWrapper::__read_rows()
@@ -93,7 +73,7 @@ void YDBDataWrapper::__read_rows()
     if (p == nullptr)
         throw std::runtime_error("ПРОИЗОШЁЛ ТРОЛЛИНГ, СТРАНИЦЫ НЕ БУДЕТ.........");
 
-    size_t page_mem_size = YDB_TABLE_PAGE_SIZE - 11; // This magic shouldn't be there...
+    size_t page_mem_size = YDB_TABLE_PAGE_SIZE - YDB_v1_page_data_offset;
     size_t page_mem_read = 0;
 
     char data[page_mem_size];

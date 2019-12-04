@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.15)
 project(UDBMS)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DECHO -fsanitize=address")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DECHO")
+# Comment the line below to make Valgrind work.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+
 #libfort
 include_directories(ext/libfort/lib)
 # jsoncons
