@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     if (TESTING) {
         env = MyTestEnvironment(&cl_local);
         ::testing::InitGoogleTest(&argc, argv);
-        RUN_ALL_TESTS();
+        return RUN_ALL_TESTS();
     }
     return 0;
 }
