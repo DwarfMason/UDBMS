@@ -70,6 +70,8 @@ const void * Cell::to_raw() const
             return std::any_cast<cell_type_v<DataType::FLOAT>>(&value_);
         case DataType::CHAR:
             return std::any_cast<cell_type_v<DataType::CHAR>>(&value_)->c_str();
+        default:
+            throw std::runtime_error("Unknown type in Cell!");
     }
 }
 void Cell::from_raw(const void *data)
