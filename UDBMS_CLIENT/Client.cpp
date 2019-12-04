@@ -41,12 +41,12 @@ void Client::ClientCommunication(int *sock, const std::string& request) {
         send(*sock, &size, sizeof(size_t), 0);
         char *send_data = strdup(to_server_msg.c_str());
         send(*sock, send_data, size, 0);
+        free(send_data);
 
         int bytes_read = recv(*sock, &size, sizeof(size), 0);
         if (!this->RecCheck(bytes_read, sock)) break;
         char *recv_data = new char[size + 1];
         recv_data[size] = '\0';
-        std::string q(recv_data);
         char flag;
         bytes_read = recv(*sock, &flag, sizeof(char), 0);
         if (!this->RecCheck(bytes_read, sock)) break;
@@ -56,6 +56,7 @@ void Client::ClientCommunication(int *sock, const std::string& request) {
             std::cerr << recv_data;
         else
             std::cout << recv_data;
+        delete[] recv_data;
         if(TESTING) break;
     }
 }
