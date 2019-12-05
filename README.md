@@ -21,3 +21,13 @@ drop table <name>, [<name>, ...];
 ```sql
 show create table <ident>;
 ```
+
+### insert into table
+```sql
+insert into <table name> (<name>, [<name>, ...]) values (<value>, [<value>, ..]);
+```
+
+### select from table
+```sql
+select <column>, [<column>, ..] from <table name>;
+```
