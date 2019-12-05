@@ -1,6 +1,7 @@
-# Documentation
+# UDBMS
+[![Actions Status](https://github.com/DwarfMason/UDBMS/workflows/BuildAndTest/badge.svg)](https://github.com/DwarfMason/UDBMS/actions)
 
-## UDBMS
+## Documentation
 
 ### create table
 
