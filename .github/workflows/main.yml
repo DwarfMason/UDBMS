@@ -66,4 +66,4 @@ jobs:
           target_branch: 'build'
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        if: ${GITHUB_REF##*/} == '!build'
+        if: endsWith(github.ref, 'build')
