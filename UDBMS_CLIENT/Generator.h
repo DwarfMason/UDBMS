@@ -10,6 +10,7 @@
 #include <utility>
 #include <set>
 #include <map>
+#include <vector>
 
 class GeneratorNode{
 public:
@@ -18,7 +19,8 @@ public:
 
     std::string GetName();
     bool InsertValue(std::initializer_list<std::string>);
-    bool DeleteValue(const std::string&);
+    bool DeleteValue(const std::string&&);
+    std::set<std::string> GetValues();
     bool GetIfRepeatable();
 
 private:
@@ -32,12 +34,30 @@ public:
     Generator();
     ~Generator() = default;
 
-    bool InsertNewNode(const std::string&);
-    void InsertIntoNode(const std::string&, std::initializer_list<std::string>);
+    bool InsertNewNode(const std::string&&);
+    void InsertIntoNode(const std::string&&, std::initializer_list<std::string>);
+    std::string GenerateRequest();
+
     std::string GetLastRequest();
 
 private:
     std::map<std::string, GeneratorNode> _nodes;
+    std::vector<std::string> _commands;
     std::string _last_request = " ";
+
+    //Request Generators
+    std::string DropTableReq();
+    std::string CreateTableReq();
+    std::string ShowCreateReq();
+    std::string InsertReq();
+    std::string UpdateReq();
+    std::string DeleteReq();
+    std::string SelectReq();
+
+    //Utility Functions
+    static bool FlipCoin();
+    std::string GetName(bool);
+    std::string GenerateSetOfNames(bool);
+    std::string GetSmth(std::string);
 };
 #endif //UDBMS_GENERATOR_H

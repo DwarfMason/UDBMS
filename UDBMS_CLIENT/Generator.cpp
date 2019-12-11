@@ -10,7 +10,7 @@ bool GeneratorNode::InsertValue(std::initializer_list<std::string> values) {
     return true;
 }
 
-bool GeneratorNode::DeleteValue(const std::string& value) {
+bool GeneratorNode::DeleteValue(const std::string &&value) {
     return !this->_values.erase(value);
 }
 
@@ -22,18 +22,21 @@ bool GeneratorNode::GetIfRepeatable() {
     return this->_repeatable;
 }
 
+std::set<std::string> GeneratorNode::GetValues() {
+    return this->_values;
+}
+
 Generator::Generator() {
-    //Entry command words
-    this->InsertNewNode("first_word");
-    this->InsertIntoNode("first_word", {"drop table", "select", "create table", "insert into",
-                                        "show create table", "update", "delete from", });
+    //Vector of commands
+    this->_commands.insert(this->_commands.end(), {"drop table", "select", "create table", "insert into",
+                                                   "show create table", "update", "delete from"});
 
     //Array of existing tables names
     this->InsertNewNode("existing_table_names");
 
     //Array of free tables names
     this->InsertNewNode("table_names");
-    this->InsertIntoNode("table_names", {"a", "b", "c", "d", "table", "stranger", "something",
+    this->InsertIntoNode("table_names", {"a", "b", "c", "d", "table_create", "stranger", "something",
                                          "zachet", "F", "pity"});
 
     //Array of existing columns names
@@ -41,8 +44,8 @@ Generator::Generator() {
 
     //Array of free tables names
     this->InsertNewNode("column_names");
-    this->InsertIntoNode("column_names", {"a", "b", "c", "d", "table", "stranger", "something",
-                                         "zachet", "F", "pity"});
+    this->InsertIntoNode("column_names", {"a", "b", "c", "d", "table_create", "stranger", "something",
+                                          "zachet", "F", "pity"});
 
     //Left set bracket
     this->InsertNewNode("left_set_bracket");
@@ -79,7 +82,7 @@ Generator::Generator() {
     //Signs
     this->InsertNewNode("signs");
     this->InsertIntoNode("signs", {">", "<", "=", "!=", ">=", "<="});
-    
+
     //Math expr
     this->InsertNewNode("math_expr");
     this->InsertIntoNode("math_expr", {"*", "/", "+", "-"});
@@ -113,12 +116,95 @@ std::string Generator::GetLastRequest() {
     return this->_last_request;
 }
 
-bool Generator::InsertNewNode(const std::string& name) {
+bool Generator::InsertNewNode(const std::string &&name) {
     if (this->_nodes.find(name) == this->_nodes.end()) return false;
     this->_nodes.emplace(name, GeneratorNode(name));
     return true;
 }
 
-void Generator::InsertIntoNode(const std::string& name, std::initializer_list<std::string> list) {
+void Generator::InsertIntoNode(const std::string &&name, std::initializer_list<std::string> list) {
     this->_nodes.find(name)->second.InsertValue(list);
 }
+
+std::string Generator::GenerateRequest() {
+    switch (4) {
+        case 0:
+            return DropTableReq();
+            break;
+        case 1:
+            return SelectReq();
+            break;
+        case 2:
+            return CreateTableReq();
+            break;
+        case 3:
+            return InsertReq();
+            break;
+        case 4:
+            return ShowCreateReq();
+            break;
+        case 5:
+            return UpdateReq();
+            break;
+        case 6:
+            return DeleteReq();
+            break;
+    }
+
+    return "¯\\_(ツ)_/¯";
+}
+
+std::string Generator::ShowCreateReq() {
+    return ("show create table" + GetName(true) + "{");
+}
+
+std::string Generator::DropTableReq() {
+    return ("drop table" + GenerateSetOfNames(true));
+}
+
+std::string Generator::CreateTableReq() {
+    std::string request = "create table " + GetName(true) + "{";
+    request.append("\n" + GetName(false) + " " + GetSmth("types"));
+    while(true) {
+        if (FlipCoin()) break;
+        request.append(",\n" + GetName(false) + " " + GetSmth("types"));
+    }
+    request.append("};");
+    return request;
+}
+
+bool Generator::FlipCoin() {
+    return rand() % 2;
+}
+
+std::string Generator::GetName(bool table_column) {
+    std::set<std::string> buff = this->_nodes.find(table_column ? "existing_table_names" :
+                                                   "existing_column_names")->second.GetValues();
+    if (!buff.empty()) {
+        int r = rand() % buff.size();
+        auto a = buff.begin();
+        std::advance(a, r);
+        return *(a);
+    } else
+        return GetSmth(table_column ? "table_names" : "column_names");
+}
+
+
+std::string Generator::GenerateSetOfNames(bool table_column) {
+    std::string buff;
+    buff.append(GetName(table_column));
+    if (FlipCoin()) {
+        buff.append(", ");
+        buff.append(GenerateSetOfNames(table_column));
+    }
+    return buff;
+}
+
+std::string Generator::GetSmth(std::string smth) {
+    std::set<std::string> buff = this->_nodes.find(smth)->second.GetValues();
+    int r = rand() % buff.size();
+    auto a = buff.begin();
+    std::advance(a, r);
+    return *(a);
+}
+
