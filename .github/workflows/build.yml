@@ -1,0 +1,61 @@
+name: BuildAndTest
+
+on:
+  push:
+    branches:
+      - build
+    
+  
+jobs:
+  BuildAndTest:  
+    name: BuildAndTest
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use PPA to get newer versions of software (fukk Ubuntu)
+        run: |
+          sudo add-apt-repository ppa:jonathonf/gcc-9.2
+          sudo add-apt-repository ppa:dns/gnu
+          sudo apt-get update
+      - name: Installing GCC
+        run: |
+          sudo apt-get install -y gcc-9 g++-9
+      - name: Install CMAKE
+        run: |
+          mkdir ~/temp
+          cd ~/temp
+          wget https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.sh
+          chmod +x ./cmake-3.15.5-Linux-x86_64.sh
+          sudo ./cmake-3.15.5-Linux-x86_64.sh --skip-license --prefix=/usr/local --exclude-subdir
+          which cmake
+         
+       # sudo apt-get update && sudo apt-get install -y cmake
+      - name: Install random shit
+        run: |
+          sudo apt install flex bison
+      - name: Install gtest
+        run: |
+          sudo apt install libgtest-dev
+          cd /usr/src/gtest/
+          sudo cmake -DBUILD_SHARED_LIBS=ON
+          sudo make
+          sudo cp *.so /usr/lib
+      - name: Checkout submodules
+        uses: textbook/git-checkout-submodule-action@2.0.0
+      - name: Build program
+        run: |
+          export CC="gcc-9"
+          export CXX="g++-9"
+          export MAKEFLAGS="-j $(nproc)"
+          cmake -H. -Bbuild
+          cmake --build build
+          cd ./UDBMS_CLIENT/
+          cmake -H. -Bbuild
+          cmake --build build
+      - name: testing
+        run: |
+          cd ./build
+          ./UDBMS &
+          sleep 5
+          cd ./UDBMS_CLIENT/
+          ./UDBMS_CLIENT
