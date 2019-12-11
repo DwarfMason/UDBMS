@@ -58,3 +58,10 @@ jobs:
           sleep 5
           cd ./UDBMS_CLIENT/
           ./UDBMS_CLIENT
+      - name: Merge to build branch
+        uses: devmasx/merge-branch@v1.1.0
+        with:
+          type: now
+          target_branch: 'build'
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
