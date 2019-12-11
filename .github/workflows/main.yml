@@ -4,6 +4,7 @@ on:
   push:
     branches: 
       - master
+      - parser_test
 
 jobs:
   BuildAndTest:  
