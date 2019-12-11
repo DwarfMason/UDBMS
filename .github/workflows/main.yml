@@ -5,7 +5,11 @@ on:
     branches: 
       - master
       - parser_test
-      - build
+  status:
+    branches:
+      - 'build'
+    
+  
 jobs:
   BuildAndTest:  
     name: BuildAndTest
