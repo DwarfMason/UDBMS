@@ -60,7 +60,7 @@ jobs:
           cd ./UDBMS_CLIENT/
           ./UDBMS_CLIENT
       - name: Merge to build branch
-        if: ${GITHUB_REF##*/} == '!build'
+        if: ${GITHUB_REF##*/} = 'build'
         uses: devmasx/merge-branch@v1.1.0
         with:
           type: now
