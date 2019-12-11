@@ -8,7 +8,6 @@
 
 int main(int argc, char **argv)
 {
-
     Client cl_local;
     cl_local.ClientInit(PORT);
     if (TESTING) {

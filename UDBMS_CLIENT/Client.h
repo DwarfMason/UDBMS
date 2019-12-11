@@ -11,6 +11,7 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <memory.h>
+#include "Generator.h"
 
 #define TESTING true
 
