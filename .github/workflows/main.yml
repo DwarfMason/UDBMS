@@ -5,7 +5,7 @@ on:
     branches: 
       - master
       - parser_test
-
+      - build
 jobs:
   BuildAndTest:  
     name: BuildAndTest
@@ -66,3 +66,4 @@ jobs:
           target_branch: 'build'
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        if: endsWith(github.ref, 'master') || endsWith(github.ref, 'parser_test')
