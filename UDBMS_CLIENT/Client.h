@@ -13,7 +13,7 @@
 #include <memory.h>
 
 #define TESTING true
-#define CONSISTENCY_TEST false
+
 
 class Client {
 public:
