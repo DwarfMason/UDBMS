@@ -3,6 +3,7 @@
 //
 #include "Client.h"
 #include <gtest/gtest.h>
+#include "Generator.h"
 
 
 class MyTestEnvironment {
