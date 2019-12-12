@@ -59,5 +59,8 @@ private:
     std::string GetName(bool);
     std::string GenerateSetOfNames(bool);
     std::string GetSmth(std::string);
+    std::string CreateExpr();
+    std::string NumericExpr();
+    std::string StrExpr();
 };
 #endif //UDBMS_GENERATOR_H
