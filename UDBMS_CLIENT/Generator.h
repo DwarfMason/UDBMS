@@ -44,6 +44,7 @@ private:
     std::map<std::string, GeneratorNode> _nodes;
     std::vector<std::string> _commands;
     std::string _last_request = " ";
+    int _name_counts = 0;
 
     //Request Generators
     std::string DropTableReq();

@@ -13,7 +13,7 @@
 #include <memory.h>
 #include "Generator.h"
 
-#define TESTING true
+#define TESTING false
 
 
 class Client {

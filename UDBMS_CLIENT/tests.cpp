@@ -3,7 +3,7 @@
 //
 #include "Client.h"
 #include <gtest/gtest.h>
-
+#include <queue>
 
 
 class MyTestEnvironment {
@@ -17,6 +17,23 @@ public:
 private:
     Client _client;
 };
+
+std::string exec(const char* cmd) {
+    char buffer[128];
+    std::string result = "";
+    FILE* pipe = popen(cmd, "r");
+    if (!pipe) throw std::runtime_error("popen() failed!");
+    try {
+        while (fgets(buffer, sizeof buffer, pipe) != NULL) {
+            result += buffer;
+        }
+    } catch (...) {
+        pclose(pipe);
+        throw;
+    }
+    pclose(pipe);
+    return result;
+}
 
 MyTestEnvironment env;
 
@@ -219,7 +236,31 @@ TEST(DATA_FUNCTIONALITY, SEVERAL_SELECT_COLUMNS_IN_SELECT_CASE){
     TestDBMS("drop table a;");
 }
 
+TEST(RANDOM_FUNC, RANDOM_CASE){
+    std::queue<std::string> callstack;
+    int cnt = 0;
+    Generator a;
+    std::string b;
+    while(!exec("pidof UDBMS").empty()) {
+        b = a.GenerateRequest();
+        if(callstack.size() < 25)
+            callstack.push(b);
+        else{
+            callstack.push(b);
+            callstack.pop();
+        }
+        TestDBMS(b);
+        cnt++;
+    }
+    std::cout << "Server died at " << b << std::endl;
+    std::cout << cnt << " Tests passed" << std::endl;
+    std::cout << "==================Stack==================" << std::endl;
+    for(int i = 0; i < 25; i++) {
+        std::cout << i << ") " << callstack.front() << std::endl;
+        callstack.pop();
+    }
 
+}
 /*TEST(CONSISTENCY_TESTS, RECCONECTION_AFTER_SERVER_DIES_CASE){
 
 }*/

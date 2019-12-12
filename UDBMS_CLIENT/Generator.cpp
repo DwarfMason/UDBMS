@@ -47,8 +47,7 @@ Generator::Generator() {
 
     //Array of free tables names
     this->InsertNewNode("column_names");
-    this->InsertIntoNode("column_names", {"a", "b", "c", "d", "table_create", "stranger", "something",
-                                          "zachet", "F", "pity"});
+    this->InsertIntoNode("column_names", {"trembolo", "tam_tam", "ramp", "hydra", "PC", "atom", "ctrl", "id"});
 
     //Left set bracket
     this->InsertNewNode("left_set_bracket");
@@ -104,11 +103,13 @@ Generator::Generator() {
 
     //Random strings
     this->InsertNewNode("random_strings");
-    this->InsertIntoNode("random_strings", {"qwerty", "people", "quiz", "baldhead", "useless", "pointless"});
+    this->InsertIntoNode("random_strings", {"qwerty", "people", "quiz", "baldhead", "useless", "pointless",
+                                            "zhizha", "cos", "sin"});
 
     //Random numbers
     this->InsertNewNode("random_nums");
-    this->InsertIntoNode("random_nums", {"123", "15", "42", "10101010101", "2101999", "5081999"});
+    this->InsertIntoNode("random_nums", {"123", "15", "42", "10101010101", "2101999", "5081999", "16", "228",
+                                         "15", "617", "65463"});
 
     //Types
     this->InsertNewNode("types");
@@ -130,7 +131,7 @@ void Generator::InsertIntoNode(const std::string &&name, std::initializer_list<s
 }
 
 std::string Generator::GenerateRequest() {
-    switch (1) {
+    switch (random()%7) {
         case 0:
             return DropTableReq();
             break;
@@ -195,6 +196,7 @@ std::string Generator::GetName(bool table_column) {
 
 std::string Generator::GenerateSetOfNames(bool table_column) {
     std::string buff;
+    this->_name_counts++;
     buff.append(GetName(table_column));
     if (FlipCoin()) {
         buff.append(", ");
@@ -230,18 +232,18 @@ std::string Generator::CreateExpr() {
     if (FlipCoin()) expression.append(NumericExpr() + " " + GetSmth("signs") + " " + NumericExpr() + ")");
     else
         expression.append(StrExpr() + " " + GetSmth("signs") + " " + StrExpr() + ")");
-    if(FlipCoin()) expression.append( " " + GetSmth("logical_expr") + CreateExpr());
+    if (FlipCoin()) expression.append(" " + GetSmth("logical_expr") + CreateExpr());
     return expression;
 }
 
 std::string Generator::NumericExpr() {
     std::string expr;
-    if(FlipCoin()) expr = GetSmth("random_nums");
+    if (FlipCoin()) expr = GetSmth("random_nums");
     else
         expr = GetName(false);
 
-    if (FlipCoin()){
-        expr.append( " " + GetSmth("math_expr") + " " + NumericExpr());
+    if (FlipCoin()) {
+        expr.append(" " + GetSmth("math_expr") + " " + NumericExpr());
         return expr;
     }
     return expr;
@@ -249,14 +251,41 @@ std::string Generator::NumericExpr() {
 
 std::string Generator::StrExpr() {
     std::string expr;
-    if(FlipCoin()) expr = GetSmth("random_strings");
+    if (FlipCoin()) expr = GetSmth("random_strings");
     else
         expr = GetName(false);
 
-    if (FlipCoin()){
-        expr.append( " " + GetSmth("math_expr") + " " + StrExpr());
+    if (FlipCoin()) {
+        expr.append(" " + GetSmth("math_expr") + " " + StrExpr());
         return expr;
     }
     return expr;
+}
+
+std::string Generator::InsertReq() {
+    std::string request = "insert into ";
+    this->_name_counts = 0;
+    request.append(GetName(true) + " (" + GenerateSetOfNames(false) + ")");
+    request.append(" values (" + GetSmth(FlipCoin() ? "random_strings" : "random_nums"));
+    for (int i = 1; i < this->_name_counts; i++)
+        request.append(", " + GetSmth(FlipCoin() ? "random_strings" : "random_nums"));
+    request.append(");");
+    return request;
+}
+
+std::string Generator::UpdateReq() {
+    std::string request = "update " + GetName(true) + " set ";
+    request.append(GenerateSetOfNames(false) + " = " +
+                   GetSmth(FlipCoin() ? "random_strings" : "random_nums"));
+    if (FlipCoin()) request.append(" where" + CreateExpr());
+    request.append(";");
+    return request;
+}
+
+std::string Generator::DeleteReq() {
+    std::string request = "delete from " + GetName(false);
+    if (FlipCoin()) request.append(" where" + CreateExpr());
+    request.append(";");
+    return request;
 }
 
