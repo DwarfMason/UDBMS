@@ -251,7 +251,9 @@ TEST(RANDOM_FUNC, RANDOM_CASE){
         }
         TestDBMS(b);
         cnt++;
+        if(cnt >= 1000) break;
     }
+    if (cnt >= 1000) EXPECT_TRUE(true);
     std::cout << "Server died at " << b << std::endl;
     std::cout << cnt << " Tests passed" << std::endl;
     std::cout << "==================Stack==================" << std::endl;
