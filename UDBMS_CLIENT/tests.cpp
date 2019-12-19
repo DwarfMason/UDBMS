@@ -4,6 +4,7 @@
 #include "Client.h"
 #include <gtest/gtest.h>
 #include <queue>
+#include <thread>
 
 
 class MyTestEnvironment {
@@ -45,18 +46,23 @@ std::string exec(const char *cmd) {
 }
 
 void KillServer(int time = 0) {
+    close(env.GetClient().GetSocket());
     usleep(time);
     std::string buf = exec("pidof UDBMS");
     system(("kill -9 " + buf).c_str());
+    env.EraseClients();
 }
 
 void KillAllServers() {
+    close(env.GetClient().GetSocket());
     system("killall -s 9 UDBMS");
+    env.EraseClients();
 }
 
 void StartServer() {
     system("../UDBMS &");
     sleep(1);
+    env.GetClient().GetSocket();
     env.AddClient();
 }
 
@@ -262,7 +268,7 @@ TEST(DATA_FUNCTIONALITY, SEVERAL_SELECT_COLUMNS_IN_SELECT_CASE) {
     TestDBMS("drop table a;");
 }
 
-TEST(RANDOM_FUNC, RANDOM_CASE) {
+/*TEST(RANDOM_FUNC, RANDOM_CASE) {
     std::queue<std::string> callstack;
     int cnt = 0;
     Generator a;
@@ -287,15 +293,78 @@ TEST(RANDOM_FUNC, RANDOM_CASE) {
         std::cout << i << ") " << callstack.front() << std::endl;
         callstack.pop();
     }
-}
+}*/
 
 TEST(CONSISTENCY_TESTS, RECCONECTION_AFTER_SERVER_DIES_CASE) {
-    close(env.GetClient().GetSocket());
     KillServer();
     env.EraseClients();
     StartServer();
     EXPECT_TRUE(TestDBMS("drop table a;", "Error 100: Table does not exist"));
     KillAllServers();
+    env.EraseClients();
 }
 
+TEST(CONSISTENCY_TESTS, WORKING_SERVER_IS_KILLED) {
+    StartServer();
+    usleep(500);
+    std::vector<bool> drop_pool;
+    TestDBMS("create table a(a integer,"
+             "b integer,"
+             "c integer,"
+             "d integer,"
+             "e integer,"
+             "f integer,"
+             "g integer,"
+             "h integer,"
+             "i integer,"
+             "j integer,"
+             "k integer,"
+             "l integer,"
+             "m integer,"
+             "n integer,"
+             "o integer,"
+             "p integer,"
+             "q integer,"
+             "r integer,"
+             "s integer,"
+             "t integer,"
+             "u integer,"
+             "v integer,"
+             "w integer,"
+             "x integer,"
+             "y integer,"
+             "z integer);");
+    for (int i = 0; i < 20; ++i) {
+        system("cp -f a.dat a1.dat");
+        std::stringstream buffer_cout;
+        std::stringstream buffer_cerr;
+        std::streambuf *old_cerr = std::cerr.rdbuf(buffer_cerr.rdbuf());
+        std::streambuf *old_cout = std::cout.rdbuf(buffer_cout.rdbuf());
+
+        buffer_cout.str("");
+        buffer_cerr.str("");
+
+        TestDBMS("select * from a;");
+        std::string buf = buffer_cout.str();
+
+        std::thread a(KillServer, i * 25);
+        a.detach();
+   //     auto begin = std::chrono::steady_clock::now();
+        TestDBMS("insert into a (a, b, c , d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z) "
+                 "values(0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5);");
+      //  auto end = std::chrono::steady_clock::now();
+      //  std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        sleep(1);
+        StartServer();
+        TestDBMS("select * from a;");
+        std::string buf_after = buffer_cout.str();
+        std::cout.rdbuf(old_cerr);
+        std::cerr.rdbuf(old_cout);
+        drop_pool.push_back((exec("cmp a.dat a1.dat").empty())^(strcmp(buf.c_str(), buf_after.c_str()) == 0));
+    }
+    for (int i = 0; i< drop_pool.size(); i++)
+        std::cout << drop_pool[0];
+    TestDBMS("drop table a;");
+    KillAllServers();
+}
 
