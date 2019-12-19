@@ -10,21 +10,30 @@ class MyTestEnvironment {
 public:
     MyTestEnvironment() = default;
 
-    explicit MyTestEnvironment(Client *client) : _client(*client) {};
+    explicit MyTestEnvironment(Client *client) { _client.push_back(*client); };
 
-    Client &GetClient() { return this->_client; };
+    Client &GetClient(int number = 0) { return this->_client[number]; };
+
+    void AddClient() {
+        _client.emplace_back(Client());
+        _client.back().ClientInit(PORT);
+    };
+
+    void EraseClients() { _client.clear(); };
 
 private:
-    Client _client;
+    std::vector<Client> _client;
 };
 
-std::string exec(const char* cmd) {
+MyTestEnvironment env;
+
+std::string exec(const char *cmd) {
     char buffer[128];
     std::string result = "";
-    FILE* pipe = popen(cmd, "r");
+    FILE *pipe = popen(cmd, "r");
     if (!pipe) throw std::runtime_error("popen() failed!");
     try {
-        while (fgets(buffer, sizeof buffer, pipe) != NULL) {
+        while (fgets(buffer, sizeof buffer, pipe) != nullptr) {
             result += buffer;
         }
     } catch (...) {
@@ -35,9 +44,24 @@ std::string exec(const char* cmd) {
     return result;
 }
 
-MyTestEnvironment env;
+void KillServer(int time = 0) {
+    usleep(time);
+    std::string buf = exec("pidof UDBMS");
+    system(("kill -9 " + buf).c_str());
+}
 
-::testing::AssertionResult TestDBMS(const std::string& input, const std::string& expected = "") {
+void KillAllServers() {
+    system("killall -s 9 UDBMS");
+}
+
+void StartServer() {
+    system("../UDBMS &");
+    sleep(1);
+    env.AddClient();
+}
+
+
+::testing::AssertionResult TestDBMS(const std::string &input, const std::string &expected = "", int client_number = 0) {
     std::stringstream buffer_cout;
     std::stringstream buffer_cerr;
     std::streambuf *old_cerr = std::cerr.rdbuf(buffer_cerr.rdbuf());
@@ -46,14 +70,15 @@ MyTestEnvironment env;
     buffer_cout.str("");
     buffer_cerr.str("");
 
-        env.GetClient().ClientCommunication(&env.GetClient().GetSocket(), input);
+    env.GetClient(client_number).ClientCommunication(&env.GetClient(client_number).GetSocket(), input);
 
-        std::cout.rdbuf(old_cerr);
+    std::cout.rdbuf(old_cerr);
     std::cerr.rdbuf(old_cout);
 
     if (buffer_cout.str().empty())
         if (buffer_cerr.str() != expected + '\n')
-            return ::testing::AssertionFailure() << "got: " << buffer_cerr.str() << "expected: " << expected << std::endl;
+            return ::testing::AssertionFailure() << "got: " << buffer_cerr.str() << "expected: " << expected
+                                                 << std::endl;
         else return ::testing::AssertionSuccess();
     else if (buffer_cout.str() != expected + '\n')
         return ::testing::AssertionFailure() << "got: " << buffer_cout.str() << "expected: " << expected << std::endl;
@@ -87,7 +112,7 @@ TEST(PARSER_CHECK, NO_BRACKET_CASE) {
     TestDBMS("drop table a;");
 }
 
-TEST(BASE_FUNCTIONALITY, TABLE_CREATION_CASE){
+TEST(BASE_FUNCTIONALITY, TABLE_CREATION_CASE) {
     TestDBMS("create table a( a integer);");
     EXPECT_TRUE(TestDBMS("show create table a;", "*************************** 1. row ***************************\n"
                                                  "       Table: a\n"
@@ -97,7 +122,7 @@ TEST(BASE_FUNCTIONALITY, TABLE_CREATION_CASE){
     TestDBMS("drop table a;");
 }
 
-TEST(BASE_FUNCTIONALITY, TABLE_CREATION_UNIQUE_CASE){
+TEST(BASE_FUNCTIONALITY, TABLE_CREATION_UNIQUE_CASE) {
     TestDBMS("create table a( a integer UNIQUE);");
     EXPECT_TRUE(TestDBMS("show create table a;", "*************************** 1. row ***************************\n"
                                                  "       Table: a\n"
@@ -107,50 +132,51 @@ TEST(BASE_FUNCTIONALITY, TABLE_CREATION_UNIQUE_CASE){
     TestDBMS("drop table a;");
 }
 
-TEST(BASE_FUNCTIONALITY, TABLE_EXISTS_CASE){
+TEST(BASE_FUNCTIONALITY, TABLE_EXISTS_CASE) {
     TestDBMS("create table a( a integer UNIQUE);");
     EXPECT_TRUE(TestDBMS("Create table a( b float);", "Error 101: Table does already exist"));
     TestDBMS("drop table a;");
 }
 
-TEST(BASE_FUNCTIONALITY, TABLE_DOES_NOT_EXIST_CASE){
+TEST(BASE_FUNCTIONALITY, TABLE_DOES_NOT_EXIST_CASE) {
     EXPECT_TRUE(TestDBMS("drop table a;", "Error 100: Table does not exist"));
 }
 
-TEST(BASE_FUNCTIONALITY, SEVERAL_TABLES_DROP_CASE){
+TEST(BASE_FUNCTIONALITY, SEVERAL_TABLES_DROP_CASE) {
     TestDBMS("create table a(a integer);");
     TestDBMS("create table b(a integer);");
     TestDBMS("drop table a, b;");
-    EXPECT_TRUE(TestDBMS("drop table a;", "Error 100: Table does not exist") && TestDBMS("drop table b;", "Error 100: Table does not exist"));
+    EXPECT_TRUE(TestDBMS("drop table a;", "Error 100: Table does not exist") &&
+                TestDBMS("drop table b;", "Error 100: Table does not exist"));
 }
 
-TEST(BASE_FUNCTIONALITY, LOTS_OF_COLUMNS_CASE){
+TEST(BASE_FUNCTIONALITY, LOTS_OF_COLUMNS_CASE) {
     TestDBMS("create table a(a integer,"
-                "b integer,"
-                "c integer,"
-                "d integer,"
-                "e integer,"
-                "f integer,"
-                "g integer,"
-                "h integer,"
-                "i integer,"
-                "j integer,"
-                "k integer,"
-                "l integer,"
-                "m integer,"
-                "n integer,"
-                "o integer,"
-                "p integer,"
-                "q integer,"
-                "r integer,"
-                "s integer,"
-                "t integer,"
-                "u integer,"
-                "v integer,"
-                "w integer,"
-                "x integer,"
-                "y integer,"
-                "z integer);");
+             "b integer,"
+             "c integer,"
+             "d integer,"
+             "e integer,"
+             "f integer,"
+             "g integer,"
+             "h integer,"
+             "i integer,"
+             "j integer,"
+             "k integer,"
+             "l integer,"
+             "m integer,"
+             "n integer,"
+             "o integer,"
+             "p integer,"
+             "q integer,"
+             "r integer,"
+             "s integer,"
+             "t integer,"
+             "u integer,"
+             "v integer,"
+             "w integer,"
+             "x integer,"
+             "y integer,"
+             "z integer);");
     EXPECT_TRUE(TestDBMS("show create table a;", "*************************** 1. row ***************************\n"
                                                  "       Table: a\n"
                                                  "Create Table: CREATE TABLE `a` (\n"
@@ -185,7 +211,7 @@ TEST(BASE_FUNCTIONALITY, LOTS_OF_COLUMNS_CASE){
 }
 
 
-TEST(DATA_FUNCTIONALITY, INSERT_VALUE_CASE){
+TEST(DATA_FUNCTIONALITY, INSERT_VALUE_CASE) {
     TestDBMS("create table a(id integer);");
     TestDBMS("insert into a(id) values(1)");
     EXPECT_TRUE(TestDBMS("select id from a;", "+----+\n"
@@ -196,25 +222,25 @@ TEST(DATA_FUNCTIONALITY, INSERT_VALUE_CASE){
     TestDBMS("drop table a;");
 }
 
-TEST(DATA_FUNCTIONALITY, NO_COLUMN_CASE){
+TEST(DATA_FUNCTIONALITY, NO_COLUMN_CASE) {
     TestDBMS("create table a(id integer);");
     TestDBMS("insert into a(id) values(1)");
     EXPECT_TRUE(TestDBMS("select b from a;", "303:No such column!"));
     TestDBMS("drop table a;");
 }
 
-TEST(DATA_FUNCTIONALITY, MULTI_INSERT_AND_WILDCART_CASE){
+TEST(DATA_FUNCTIONALITY, MULTI_INSERT_AND_WILDCART_CASE) {
     TestDBMS("create table a( id integer, a integer, b integer);");
     TestDBMS("insert into a (id, a) values (1, 2);");
     EXPECT_TRUE(TestDBMS("select * from a;", "+----+---+---+\n"
-                                                      "| id | a | b |\n"
-                                                      "+----+---+---+\n"
-                                                      "| 1  | 2 | 0 |\n"
-                                                      "+----+---+---+"));
+                                             "| id | a | b |\n"
+                                             "+----+---+---+\n"
+                                             "| 1  | 2 | 0 |\n"
+                                             "+----+---+---+"));
     TestDBMS("drop table a;");
 }
 
-TEST(DATA_FUNCTIONALITY, REPOSITION_OF_COLUMN_NAMES_CASE){
+TEST(DATA_FUNCTIONALITY, REPOSITION_OF_COLUMN_NAMES_CASE) {
     TestDBMS("create table a( id integer, a integer, b integer);");
     TestDBMS("insert into a (id, a) values (1, 2);");
     EXPECT_TRUE(TestDBMS("select a,id from a;", "+---+----+\n"
@@ -225,7 +251,7 @@ TEST(DATA_FUNCTIONALITY, REPOSITION_OF_COLUMN_NAMES_CASE){
     TestDBMS("drop table a;");
 }
 
-TEST(DATA_FUNCTIONALITY, SEVERAL_SELECT_COLUMNS_IN_SELECT_CASE){
+TEST(DATA_FUNCTIONALITY, SEVERAL_SELECT_COLUMNS_IN_SELECT_CASE) {
     TestDBMS("create table a( id integer, a integer, b integer);");
     TestDBMS("insert into a (id, a) values (1, 2);");
     EXPECT_TRUE(TestDBMS("select id, a from a;", "+----+---+\n"
@@ -236,35 +262,40 @@ TEST(DATA_FUNCTIONALITY, SEVERAL_SELECT_COLUMNS_IN_SELECT_CASE){
     TestDBMS("drop table a;");
 }
 
-TEST(RANDOM_FUNC, RANDOM_CASE){
+TEST(RANDOM_FUNC, RANDOM_CASE) {
     std::queue<std::string> callstack;
     int cnt = 0;
     Generator a;
     std::string b;
-    while(!exec("pidof UDBMS").empty()) {
+    while (!exec("pidof UDBMS").empty()) {
         b = a.GenerateRequest();
-        if(callstack.size() < 25)
+        if (callstack.size() < 25)
             callstack.push(b);
-        else{
+        else {
             callstack.push(b);
             callstack.pop();
         }
         TestDBMS(b);
         cnt++;
-        if(cnt >= 1000) break;
+        if (cnt >= 500) break;
     }
     if (cnt >= 1000) EXPECT_TRUE(true);
     std::cout << "Server died at " << b << std::endl;
     std::cout << cnt << " Tests passed" << std::endl;
     std::cout << "==================Stack==================" << std::endl;
-    for(int i = 0; i < 25; i++) {
+    for (int i = 0; i < 25; i++) {
         std::cout << i << ") " << callstack.front() << std::endl;
         callstack.pop();
     }
-
 }
-/*TEST(CONSISTENCY_TESTS, RECCONECTION_AFTER_SERVER_DIES_CASE){
 
-}*/
+TEST(CONSISTENCY_TESTS, RECCONECTION_AFTER_SERVER_DIES_CASE) {
+    close(env.GetClient().GetSocket());
+    KillServer();
+    env.EraseClients();
+    StartServer();
+    EXPECT_TRUE(TestDBMS("drop table a;", "Error 100: Table does not exist"));
+    KillAllServers();
+}
 
 

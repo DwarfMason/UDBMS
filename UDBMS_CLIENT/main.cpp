@@ -3,8 +3,6 @@
 #include <gtest/gtest.h>
 
 /// TO START TESTING CHANGE TESTING DEFINE IN CLIENT.h TO TRUE
-#define PORT 2081
-
 
 int main(int argc, char **argv)
 {
