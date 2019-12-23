@@ -90,8 +90,8 @@ void emit(char *s,...);
 %token AND
 %token OR
 
-%token<std::string> INTNUM
-%token<std::string> APPROXNUM
+%token<int> INTNUM
+%token<float> APPROXNUM
 %token<std::string> STRING
 %token<std::string> BOOL
 %token<std::string> NAME
@@ -110,6 +110,9 @@ void emit(char *s,...);
 %type<CreateStatement::Column> create_single_param
 %type<std::vector<int>> param_flags
 %type<int> create_flag
+
+%type<std::pair<std::string,std::any>> expr
+%type<std::any> sub_expr
 %type<CreateStatement::Constraint_expr> constraints_expr
 %type<CreateStatement::Type> var_type
 /* show create */
@@ -129,8 +132,8 @@ void emit(char *s,...);
 
 /*expr*/ /*TODO expr*/
 
-%type<std::string> value
-%type<std::vector<std::string>> values_list_expr
+%type<std::any> value
+%type<std::vector<std::any>> values_list_expr
 %start stmt_list
 %%
 
@@ -167,11 +170,13 @@ params_expr                 /*std::vector<Column>*/
     | params_expr ',' create_single_param       {$$ = $1; $$.push_back($3);}
     ;
 
+
+
 create_single_param         /*Column*/
     : NAME var_type                             {$$ = CreateStatement::Column();$$.name = $1;$$.type = $2;}
-    | NAME var_type '(' INTNUM ')'              {$$ = CreateStatement::Column();$$.name = $1;$$.type = $2; $$.typeLen = atoi($4.c_str());}
+    | NAME var_type '(' INTNUM ')'              {$$ = CreateStatement::Column();$$.name = $1;$$.type = $2; $$.typeLen = $4;}
     | NAME var_type param_flags                 {$$ = CreateStatement::Column();$$.name = $1; $$.type = $2; $$.flags = $3;}
-    | NAME var_type '(' INTNUM ')' param_flags  {$$ = CreateStatement::Column();$$.name = $1; $$.type = $2; $$.typeLen = atoi($4.c_str()); $$.flags = $6;}
+    | NAME var_type '(' INTNUM ')' param_flags  {$$ = CreateStatement::Column();$$.name = $1; $$.type = $2; $$.typeLen = $4; $$.flags = $6;}
     ;
 
 param_flags                 /*std::vector<int>*/
@@ -203,22 +208,22 @@ constraints_expr            /*Constraint_expr*/
 
 /*show create*/
 show_create:
-	SHOW CREATE TABLE NAME
-	{
-	    $$ = ShowCreateStatement::Statement();
-	    $$.name = $4;
-	}
-	;
+  SHOW CREATE TABLE NAME
+  {
+      $$ = ShowCreateStatement::Statement();
+      $$.name = $4;
+  }
+  ;
 /*end show create*/
 
 /*drop Table*/
 drop_table_stmt:
-	DROP TABLE name_list_expr
-	{
-	    $$ = DropTableStatement::Statement();
+  DROP TABLE name_list_expr
+  {
+      $$ = DropTableStatement::Statement();
         $$.keys = $3;
-	}
-	;
+  }
+  ;
 /*end drop Table */
 
 
@@ -239,12 +244,12 @@ insert_stmt:        /*InsertStatement::Statement*/
 
 /*update stmt*/
 update_stmt:        /*UpdateStatement::Statement*/
-    UPDATE NAME SET NAME '=' value WHERE expr  {
+    UPDATE NAME SET NAME '=' value WHERE '(' expr ')'  {
         $$ = UpdateStatement::Statement();
         $$.tableToUpdate = $2;
         $$.columnName = $4;
         $$.newValue = $6;
- /*       $$.expr = $8;   */ /*TODO*/
+        $$.expr = $9;    /*TODO*/
     }
     ;
 
@@ -256,7 +261,7 @@ delete_stmt:            /*DeleteStatement::Statement*/
       WHERE expr              {
         $$ = DeleteStatement::Statement();
         $$.name = $3;
-   /*     $$.expr = $5;   */ /*TODO*/
+        $$.expr = $5;    /*TODO*/
     }
     ;
 
@@ -268,7 +273,8 @@ select_stmt             /*SelectStatement::Statement*/
         $$ = SelectStatement::Statement();
         $$.name = $4;
         $$.selector = $2;
-/*        $$.expr = $6; */ /*TODO*/
+        $$.expr = $7;  /*TODO*/
+        $$.useExpr = true;
     }
     | SELECT selector FROM NAME   {
               $$ = SelectStatement::Statement();
@@ -285,18 +291,18 @@ selector    /*std::vector<std::string> */
 
 /*expr */ /*TODO*/
 expr
-    : expr '=' expr     {emit("= \n");}
-    | expr '-' expr     {emit("- \n");}
-    | expr '*' expr     {emit("* \n");}
-    | expr '/' expr     {emit("/ \n");}
-    | expr ">=" expr    {emit(">= \n");}
-    | expr "<=" expr    {emit("<= \n");}
-    | expr '>' expr     {emit("> \n");}
-    | expr '<' expr     {emit("< \n");}
-    | expr AND expr     {emit("AND \n");}
-    | expr OR expr      {emit("OR \n");}
-    | '(' expr ')'
+    : NAME '=' sub_expr     {$$ = std::pair($1,$3);}
     ;
+
+sub_expr
+    : INTNUM            {$$ = std::any($1);}
+    | APPROXNUM         {$$ = std::any($1);}
+    | STRING            {$$ = std::any($1);}
+    | BOOL              {$$ = std::any($1);}
+    | NAME              {$$ = std::any($1);}
+    ;
+
+
 
 expr
     : INTNUM            {emit("int\n");}
@@ -326,7 +332,7 @@ value       /*std::string*/
     ;
 
 values_list_expr        /*std::vector<std::string>*/
-    : value                         {$$ = std::vector<std::string>();$$.push_back($1);}
+    : value                         {$$ = std::vector<std::any>();$$.push_back($1);}
     | values_list_expr ',' value    {$$ = $1;$$.push_back($3);}
 %%
 

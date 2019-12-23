@@ -14,7 +14,7 @@ struct InsertStatement : public BaseStatement
     {
         std::string name;
         std::vector<std::string> cols;
-        std::vector<std::string> value;
+        std::vector<std::any> value;
     };
 };
 #endif //INSERTSTATEMENT_H

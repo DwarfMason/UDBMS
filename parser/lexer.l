@@ -64,13 +64,13 @@ NULL        { return token::NULL_y;     }
 
 (\/\*)[^(\*\/)]*(\*\/) {}
 
--?[0-9]+    { yylval->build<std::string>(yytext); return token::INTNUM; }
+-?[0-9]+    { yylval->build<int>(std::stoi(yytext)); return token::INTNUM; }
 
 -?[0-9]+"."[0-9]*       |
 -?"."[0-9]+     |
 -?[0-9]+E[-+]?[0-9]+    |
 -?[0-9]+"."[0-9]*E[-+]?[0-9]+ |
--?"."[0-9]+E[-+]?[0-9]+ { yylval->build<std::string>(yytext); return token::APPROXNUM; }
+-?"."[0-9]+E[-+]?[0-9]+ { yylval->build<float>(std::stof(yytext)); return token::APPROXNUM; }
 
 
 '(\\.|''|[^'\n])*'   |

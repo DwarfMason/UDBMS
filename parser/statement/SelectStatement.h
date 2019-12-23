@@ -6,6 +6,7 @@
 #define SELECTSTATEMENT_H
 #include <string>
 #include <vector>
+#include <any>
 #include "BaseStatement.h"
 struct SelectStatement : public BaseStatement
 {
@@ -16,7 +17,8 @@ struct SelectStatement : public BaseStatement
         /* example
          * `id` = `qwe`
          * */
-        std::pair<std::string,std::string> expr;
+        std::pair<std::string,std::any> expr;
+        bool useExpr = false;
     };
 };
 #endif //SELECTSTATEMENT_H
