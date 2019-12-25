@@ -16,6 +16,7 @@ public:
     Client &GetClient(int number = 0) { return this->_client[number]; };
 
     void AddClient() {
+        auto a = _client.size();
         _client.emplace_back(Client());
         _client.back().ClientInit(PORT);
     };
@@ -27,6 +28,10 @@ private:
 };
 
 MyTestEnvironment env;
+
+void StraightRequest(const std::string& buf, int client_num = 0){
+    env.GetClient(client_num).ClientCommunication(&env.GetClient(client_num).GetSocket(), buf);
+}
 
 std::string exec(const char *cmd) {
     char buffer[128];
@@ -47,9 +52,9 @@ std::string exec(const char *cmd) {
 
 void KillServer(int time = 0) {
     close(env.GetClient().GetSocket());
-    usleep(time);
     std::string buf = exec("pidof UDBMS");
-    system(("kill -9 " + buf).c_str());
+    usleep(time);
+    system("killall -s 9 UDBMS");
     env.EraseClients();
 }
 
@@ -60,9 +65,10 @@ void KillAllServers() {
 }
 
 void StartServer() {
+    close(env.GetClient().GetSocket());
+    env.EraseClients();
     system("../UDBMS &");
     sleep(1);
-    env.GetClient().GetSocket();
     env.AddClient();
 }
 
@@ -78,8 +84,8 @@ void StartServer() {
 
     env.GetClient(client_number).ClientCommunication(&env.GetClient(client_number).GetSocket(), input);
 
-    std::cout.rdbuf(old_cerr);
-    std::cerr.rdbuf(old_cout);
+    std::cout.rdbuf(old_cout);
+    std::cerr.rdbuf(old_cerr);
 
     if (buffer_cout.str().empty())
         if (buffer_cerr.str() != expected + '\n')
@@ -299,6 +305,7 @@ TEST(CONSISTENCY_TESTS, RECCONECTION_AFTER_SERVER_DIES_CASE) {
     KillServer();
     env.EraseClients();
     StartServer();
+    StraightRequest("select * from a;");
     EXPECT_TRUE(TestDBMS("drop table a;", "Error 100: Table does not exist"));
     KillAllServers();
     env.EraseClients();
@@ -334,36 +341,38 @@ TEST(CONSISTENCY_TESTS, WORKING_SERVER_IS_KILLED) {
              "x integer,"
              "y integer,"
              "z integer);");
-    for (int i = 0; i < 20; ++i) {
+    for (int i = 2; i < 40; ++i) {
         system("cp -f a.dat a1.dat");
         std::stringstream buffer_cout;
-        std::stringstream buffer_cerr;
-        std::streambuf *old_cerr = std::cerr.rdbuf(buffer_cerr.rdbuf());
         std::streambuf *old_cout = std::cout.rdbuf(buffer_cout.rdbuf());
 
         buffer_cout.str("");
-        buffer_cerr.str("");
 
-        TestDBMS("select * from a;");
+        StraightRequest("select * from a;");
         std::string buf = buffer_cout.str();
-
-        std::thread a(KillServer, i * 25);
+        std::thread a = std::thread([i](){KillServer(7.5*996200);});
         a.detach();
-   //     auto begin = std::chrono::steady_clock::now();
+
         TestDBMS("insert into a (a, b, c , d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z) "
                  "values(0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5);");
-      //  auto end = std::chrono::steady_clock::now();
-      //  std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        TestDBMS("insert into a (a, b, c , d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z) "
+                 "values(0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5);");
+        TestDBMS("insert into a (a, b, c , d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z) "
+                 "values(0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5);");
+        TestDBMS("insert into a (a, b, c , d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z) "
+                 "values(0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5);");
         sleep(1);
         StartServer();
-        TestDBMS("select * from a;");
+        buffer_cout.str("");
+        StraightRequest("select * from a;");
         std::string buf_after = buffer_cout.str();
-        std::cout.rdbuf(old_cerr);
-        std::cerr.rdbuf(old_cout);
-        drop_pool.push_back((exec("cmp a.dat a1.dat").empty())^(strcmp(buf.c_str(), buf_after.c_str()) == 0));
+        std::cout.rdbuf(old_cout);
+        if(!((exec("cmp a.dat a1.dat").empty())^(strcmp(buf.c_str(), buf_after.c_str()) == 0))) {
+            StraightRequest("select * from a;");
+        }
     }
     for (int i = 0; i< drop_pool.size(); i++)
-        std::cout << drop_pool[0];
+        std::cout << drop_pool[i];
     TestDBMS("drop table a;");
     KillAllServers();
 }

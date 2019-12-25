@@ -3,7 +3,7 @@
 #include <fstream>
 #include "Server.h"
 
-#define PORT 2081
+#define PORT 2083
 
 int main() {
     FILE *config;

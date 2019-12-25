@@ -189,16 +189,16 @@ void UDBMS::Driver::delete_stmt(DeleteStatement::Statement stmt)
             }
 
             if (flag){
+                wrapper->next_row();
                 wrapper->delete_current_row();
-            }
-
+            }else
             wrapper->next_row();
         }
         catch (cursor_eof_error& err) {
             break;
         }
     }
-
+    std::cout << "Deleted" << std::endl;
     delete wrapper;
 }
 
@@ -244,13 +244,13 @@ void UDBMS::Driver::update(UpdateStatement::Statement stmt)
                 std::map<std::string,std::any> value = {{stmt.columnName,stmt.newValue}};
                 wrapper->update_current_row(value);
             }
-
             wrapper->next_row();
         }
         catch (cursor_eof_error& err) {
             break;
         }
     }
+    std::cout << "Updated" << std::endl;
     delete wrapper;
 }
 
@@ -313,7 +313,7 @@ void UDBMS::Driver::select(SelectStatement::Statement stmt)
                     }
             } else
                 flag = true;
-                    if (flag || !stmt.useExpr) {
+                    if ((flag || !stmt.useExpr) && !wrapper->get_current_row().is_deleted()) {
                         for (int selectedCol : selectedCols) {
                             if (columns[selectedCol].get_type() == DataType::FLOAT)
                                 tempData.push_back(std::to_string(

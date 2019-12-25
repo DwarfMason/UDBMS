@@ -63,7 +63,7 @@ void Client::ClientCommunication(int *sock, const std::string& request) {
 
 bool Client::RecCheck(int bytes_read, int *sock) {
     if (bytes_read <= 0) {
-        perror("Server connection lost");
+       // perror("Server connection lost");
         close(*sock);
         return false;
     }

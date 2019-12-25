@@ -13,8 +13,8 @@
 #include <memory.h>
 #include "Generator.h"
 
-#define TESTING true
-#define PORT 2081
+#define TESTING false
+#define PORT 2083
 
 
 class Client {
