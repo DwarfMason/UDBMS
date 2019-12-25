@@ -13,7 +13,7 @@
 #include <memory.h>
 #include "Generator.h"
 
-#define TESTING false
+#define TESTING true
 #define PORT 2083
 
 

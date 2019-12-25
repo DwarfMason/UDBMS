@@ -7,6 +7,14 @@
 #include <thread>
 
 
+template <typename T>
+std::string toString(T val)
+{
+    std::ostringstream oss;
+    oss<< val;
+    return oss.str();
+}
+
 class MyTestEnvironment {
 public:
     MyTestEnvironment() = default;
@@ -16,7 +24,6 @@ public:
     Client &GetClient(int number = 0) { return this->_client[number]; };
 
     void AddClient() {
-        auto a = _client.size();
         _client.emplace_back(Client());
         _client.back().ClientInit(PORT);
     };
@@ -301,7 +308,7 @@ TEST(DATA_FUNCTIONALITY, SEVERAL_SELECT_COLUMNS_IN_SELECT_CASE) {
     }
 }*/
 
-TEST(CONSISTENCY_TESTS, RECCONECTION_AFTER_SERVER_DIES_CASE) {
+/*TEST(CONSISTENCY_TESTS, RECCONECTION_AFTER_SERVER_DIES_CASE) {
     KillServer();
     env.EraseClients();
     StartServer();
@@ -375,5 +382,86 @@ TEST(CONSISTENCY_TESTS, WORKING_SERVER_IS_KILLED) {
         std::cout << drop_pool[i];
     TestDBMS("drop table a;");
     KillAllServers();
+}*/
+
+TEST(MVCC, TESTING_TWO_UPDATES){
+    env.AddClient();
+    TestDBMS("create table a(a integer, b integer, c integer, d integer);");
+
+    for (int i = 0; i < 1000; ++i) {
+        TestDBMS("insert into a (a,b,c,d) values (" + toString<int>(i % 3) + "," + toString<int>(i % 4) +
+                 "," + toString<int>(i % 5) + "," + toString<int>(i % 6) + ");");
+    }
+
+
+    std::thread a = std::thread([](){env.GetClient().ClientCommunication(&env.GetClient().GetSocket(),
+                                     "update a set a = 6 where (a = 0);");});
+    std::thread b = std::thread([](){env.GetClient(1).ClientCommunication(&env.GetClient(1).GetSocket(),
+                                     "update a set a = 8 where (a = 6);");});
+    a.detach();
+    b.join();
+
+    std::stringstream buffer_cout;
+    std::stringstream buffer_cerr;
+    std::streambuf *old_cerr = std::cerr.rdbuf(buffer_cerr.rdbuf());
+    std::streambuf *old_cout = std::cout.rdbuf(buffer_cout.rdbuf());
+
+    buffer_cout.str("");
+    buffer_cerr.str("");
+
+    env.GetClient().ClientCommunication(&env.GetClient().GetSocket(), "select * from a where a = 6");
+    std::string buf1 = buffer_cout.str();
+    buffer_cout.clear();
+    env.GetClient().ClientCommunication(&env.GetClient().GetSocket(), "select * from a where a = 8");
+    std::string buf2 = buffer_cout.str();
+    buffer_cout.clear();
+    env.GetClient().ClientCommunication(&env.GetClient().GetSocket(), "select * from a where a = 200");
+    std::string buf_exotic = buffer_cout.str();
+    buffer_cout.clear();
+
+    std::cout.rdbuf(old_cout);
+    std::cerr.rdbuf(old_cerr);
+
+    EXPECT_TRUE(!strcmp(buf1.c_str(), buf2.c_str()) || !strcmp(buf1.c_str(), buf_exotic.c_str()) ||
+    !strcmp(buf2.c_str(), buf_exotic.c_str()));
+    TestDBMS("drop table a;");
+}
+
+TEST(MVCC, DIRTY_READ){
+    TestDBMS("create table a(a integer, b integer, c integer, d integer);");
+    TestDBMS("create table a(a integer, b integer, c integer, d integer);");
+
+
+    for (int i = 0; i < 1000; ++i) {
+        TestDBMS("insert into a (a,b,c,d) values (" + toString<int>(i % 3) + "," + toString<int>(i % 4) +
+                 "," + toString<int>(i % 5) + "," + toString<int>(i % 6) + ");");
+        TestDBMS("insert into b (a,b,c,d) values (" + toString<int>(i % 3) + "," + toString<int>(i % 4) +
+                 "," + toString<int>(i % 5) + "," + toString<int>(i % 6) + ");");
+    }
+    TestDBMS("update b set a = 6 where (a = 0);");
+
+    std::stringstream buffer_cout;
+    std::stringstream buffer_cerr;
+    std::streambuf *old_cerr = std::cerr.rdbuf(buffer_cerr.rdbuf());
+    std::streambuf *old_cout = std::cout.rdbuf(buffer_cout.rdbuf());
+
+    buffer_cout.str("");
+    buffer_cerr.str("");
+
+    env.GetClient().ClientCommunication(&env.GetClient().GetSocket(), "select * from b where (a=6);");
+
+    std::string buf1 = buffer_cout.str();
+    buffer_cout.str("");
+
+    std::thread a = std::thread([](){env.GetClient().ClientCommunication(&env.GetClient().GetSocket(),
+                                     "update a set a = 6 where (a = 0);");});
+    std::thread b = std::thread([](){env.GetClient(1).ClientCommunication(&env.GetClient(1).GetSocket(),
+                                                                         "select * from a where (a = 6);");});
+
+    std::cout.rdbuf(old_cout);
+    std::cerr.rdbuf(old_cerr);
+    a.detach();
+    b.join();
+
 }
 
