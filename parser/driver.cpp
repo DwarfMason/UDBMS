@@ -4,6 +4,7 @@
 #include <api/TableFileWorker.h>
 #include <api/data_wrap/BaseDataWrapper.h>
 #include <iomanip>
+#include <type_traits>
 
 #include "driver.hpp"
 #include "statement/BaseStatement.h"
@@ -14,6 +15,24 @@ UDBMS::Driver::~Driver()
    scanner = nullptr;
    delete(parser);
    parser = nullptr;
+}
+
+int getPosByName(const std::vector<Column> &cols,const std::string &name){
+    for (int i = 0; i < cols.size(); ++i) {
+        if  (cols.at(i).get_name() == name) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+std::map<std::string,int> getTableNames(TableMetadata table){
+    std::map<std::string,int> res;
+    auto colums = table.get_columns();
+    for(int i = 0;i < colums.size();++i){
+        res.insert(std::pair(colums[i].get_name(),i));
+    }
+    return res;
 }
 
 void UDBMS::Driver::parse(std::stringstream &stream )
@@ -139,35 +158,48 @@ void UDBMS::Driver::show_create(ShowCreateStatement::Statement stmt)
         std::cerr << e.msg() << std::endl;
     }
 }
+
 void UDBMS::Driver::delete_stmt(DeleteStatement::Statement stmt)
 {
-    std::cout << stmt.name << "\n";
-    std::cout << "where: " << stmt.expr.first << " = " << stmt.expr.second << '\n';
     auto table = TableFileWorker::load_table(stmt.name);
     BaseDataWrapper* wrapper = TableFileWorker::load_table_data(table);
-
+    auto idMap = getTableNames(table);
+    auto colums = table.get_columns();
     while (true) {
         try {
             Row row = wrapper->get_current_row();
-            if (false) /* TODO expr result*/
+            bool flag = false;
+            try {
+                if (std::any_cast<int>(stmt.expr.second) == row.get_at(idMap[stmt.expr.first]).get_value<int>())
+                    flag = true;
+            } catch (std::bad_any_cast &e){
+                try {
+                    if (std::any_cast<float>(stmt.expr.second) == row.get_at(idMap[stmt.expr.first]).get_value<float>())
+                        flag = true;
+                } catch (std::bad_any_cast &e){
+                    try {
+                        if (std::any_cast<std::string>(stmt.expr.second) == row.get_at(idMap[stmt.expr.first]).get_value<std::string>())
+                            flag = true;
+                    } catch (...){
+                        throw custom_exception(666,"invalid type");
+                    }
+
+                }
+
+            }
+
+            if (flag){
+                wrapper->next_row();
                 wrapper->delete_current_row();
+            }else
             wrapper->next_row();
         }
         catch (cursor_eof_error& err) {
             break;
         }
     }
-
+    std::cout << "Deleted" << std::endl;
     delete wrapper;
-}
-
-int getPosByName(const std::vector<Column> &cols,const std::string &name){
-    for (int i = 0; i < cols.size(); ++i) {
-        if  (cols.at(i).get_name() == name) {
-            return i;
-        }
-    }
-    return -1;
 }
 
 /*TODO constraint error*/
@@ -184,20 +216,41 @@ void UDBMS::Driver::update(UpdateStatement::Statement stmt)
 
     std::vector<Column> columns = table.get_columns();
     int pos = getPosByName(columns,stmt.columnName);
-
+    auto idMap = getTableNames(table);
     while (true) {
         try {
             Row row = wrapper->get_current_row();
-            if (false) { /* TODO expr result*/
-                // TODO wrapper->update_current_row(std::map with key and value)
+            bool flag = false;
+            try {
+                if (std::any_cast<int>(stmt.expr.second) == row.get_at(idMap[stmt.expr.first]).get_value<int>())
+                    flag = true;
+            } catch (std::bad_any_cast &e){
+                try {
+                    if (std::any_cast<float>(stmt.expr.second) == row.get_at(idMap[stmt.expr.first]).get_value<float>())
+                        flag = true;
+                } catch (std::bad_any_cast &e){
+                    try {
+                        if (std::any_cast<std::string>(stmt.expr.second) == row.get_at(idMap[stmt.expr.first]).get_value<std::string>())
+                            flag = true;
+                    } catch (...){
+                        throw custom_exception(666,"invalid type");
+                    }
+
+                }
+
+            }
+
+            if (flag){
+                std::map<std::string,std::any> value = {{stmt.columnName,stmt.newValue}};
+                wrapper->update_current_row(value);
             }
             wrapper->next_row();
-            std::cout << "Updated.\n";
         }
         catch (cursor_eof_error& err) {
             break;
         }
     }
+    std::cout << "Updated" << std::endl;
     delete wrapper;
 }
 
@@ -235,22 +288,50 @@ void UDBMS::Driver::select(SelectStatement::Statement stmt)
             try {
                 Row row = wrapper->get_current_row();
                 std::vector<std::string> tempData;
-                for (int selectedCol : selectedCols) {
-                    if (columns[selectedCol].get_type() == DataType::FLOAT)
-                        tempData.push_back(std::to_string(
-                            row.get_at(selectedCol).get_value<cell_type_v<DataType::FLOAT>>()
-                            ));
-                    if (columns[selectedCol].get_type() == DataType::CHAR)
-                        tempData.push_back(
-                            row.get_at(selectedCol).get_value<cell_type_v<DataType::CHAR>>()
-                            );
-                    if (columns[selectedCol].get_type() == DataType::INTEGER)
-                        tempData.push_back(std::to_string(
-                            row.get_at(selectedCol).get_value<cell_type_v<DataType::INTEGER>>()
-                            ));
-                }
-                data.push_back(tempData);
-                wrapper->next_row();
+                auto idMap = getTableNames(table);
+                bool flag = false;
+                if (stmt.useExpr) {
+                    try {
+                        if (std::any_cast<int>(stmt.expr.second) == row.get_at(idMap[stmt.expr.first]).get_value<int>())
+                            flag = true;
+                    } catch (std::bad_any_cast &e) {
+                        try {
+                            if (std::any_cast<float>(stmt.expr.second) ==
+                                row.get_at(idMap[stmt.expr.first]).get_value<float>())
+                                flag = true;
+                        } catch (std::bad_any_cast &e) {
+                            try {
+                                if (std::any_cast<std::string>(stmt.expr.second) ==
+                                    row.get_at(idMap[stmt.expr.first]).get_value<std::string>())
+                                    flag = true;
+                            } catch (...) {
+                                throw custom_exception(666, "invalid type");
+                            }
+
+                        }
+
+                    }
+            } else
+                flag = true;
+                    if ((flag || !stmt.useExpr) && !wrapper->get_current_row().is_deleted()) {
+                        for (int selectedCol : selectedCols) {
+                            if (columns[selectedCol].get_type() == DataType::FLOAT)
+                                tempData.push_back(std::to_string(
+                                        row.get_at(selectedCol).get_value<cell_type_v<DataType::FLOAT>>()
+                                ));
+                            if (columns[selectedCol].get_type() == DataType::CHAR)
+                                tempData.push_back(
+                                        row.get_at(selectedCol).get_value<cell_type_v<DataType::CHAR>>()
+                                );
+                            if (columns[selectedCol].get_type() == DataType::INTEGER)
+                                tempData.push_back(std::to_string(
+                                        row.get_at(selectedCol).get_value<cell_type_v<DataType::INTEGER>>()
+                                ));
+                        }
+                        data.push_back(tempData);
+                    }
+                    wrapper->next_row();
+
             } catch (cursor_eof_error& err){
                 break;
             }
@@ -295,20 +376,7 @@ void UDBMS::Driver::insert(InsertStatement::Statement stmt)
         if (columnPos != -1){
             //mp.insert_or_assign(stmt.cols[i], ValueManager::createPointer(stmt.value[i],columns[columnPos].get_type()));
             //TODO move data create somewhere
-            std::any val;
-            switch (columns[columnPos].get_type())
-            {
-                case DataType::INTEGER:
-                    val = std::stoi(stmt.value[i]);
-                    break;
-                case DataType::FLOAT:
-                    val = std::stof(stmt.value[i]);
-                    break;
-                case DataType::CHAR:
-                    val = stmt.value[i];
-                    break;
-            }
-            mp.insert_or_assign(stmt.cols[i], std::move(val));
+            mp.insert(std::pair(stmt.cols[i], stmt.value[i]));
             std::cout << "Inserted.\n";
         } else {
             throw sql_error(303,"no such column");
@@ -325,8 +393,7 @@ void UDBMS::Driver::insert(InsertStatement::Statement stmt)
     for (const auto& kv : mp)
     {
         size_t index = tbl.get_index_by_name(kv.first);
-        const std::any& value = kv.second;
-        new_row.set_at(index, value);
+        new_row.set_at(index, kv.second);
     }
     wrapper->insert_row(new_row);
     delete wrapper;

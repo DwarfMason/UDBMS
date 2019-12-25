@@ -135,7 +135,8 @@ Row YDBDataWrapper::get_current_row() const
 
 void YDBDataWrapper::delete_current_row()
 {
-    curr_page_rows_[curr_row_idx_].mark_as_deleted();
+    curr_page_rows_[curr_row_idx_-1].mark_as_deleted();
+    //curr_page_rows_[curr_row_idx_].mark_as_deleted();
     __commit();
 }
 

@@ -26,6 +26,11 @@ public:
     void ClientTask(int id);
     void AcceptConnection(int id);
 
+    std::stringstream buffer_cout;
+    std::stringstream buffer_cerr;
+    std::streambuf *old_cerr = std::cerr.rdbuf(buffer_cerr.rdbuf());
+    std::streambuf *old_cout = std::cout.rdbuf(buffer_cout.rdbuf());
+
 private:
     int _server_sock;
     int _live_connections = 0;

@@ -3,24 +3,84 @@
 //
 #include "Client.h"
 #include <gtest/gtest.h>
+#include <queue>
+#include <thread>
 
 
+template <typename T>
+std::string toString(T val)
+{
+    std::ostringstream oss;
+    oss<< val;
+    return oss.str();
+}
 
 class MyTestEnvironment {
 public:
     MyTestEnvironment() = default;
 
-    explicit MyTestEnvironment(Client *client) : _client(*client) {};
+    explicit MyTestEnvironment(Client *client) { _client.push_back(*client); };
 
-    Client &GetClient() { return this->_client; };
+    Client &GetClient(int number = 0) { return this->_client[number]; };
+
+    void AddClient() {
+        _client.emplace_back(Client());
+        _client.back().ClientInit(PORT);
+    };
+
+    void EraseClients() { _client.clear(); };
 
 private:
-    Client _client;
+    std::vector<Client> _client;
 };
 
 MyTestEnvironment env;
 
-::testing::AssertionResult TestDBMS(const std::string& input, const std::string& expected = "") {
+void StraightRequest(const std::string& buf, int client_num = 0){
+    env.GetClient(client_num).ClientCommunication(&env.GetClient(client_num).GetSocket(), buf);
+}
+
+std::string exec(const char *cmd) {
+    char buffer[128];
+    std::string result = "";
+    FILE *pipe = popen(cmd, "r");
+    if (!pipe) throw std::runtime_error("popen() failed!");
+    try {
+        while (fgets(buffer, sizeof buffer, pipe) != nullptr) {
+            result += buffer;
+        }
+    } catch (...) {
+        pclose(pipe);
+        throw;
+    }
+    pclose(pipe);
+    return result;
+}
+
+void KillServer(int time = 0) {
+    close(env.GetClient().GetSocket());
+    std::string buf = exec("pidof UDBMS");
+    usleep(time);
+    system("killall -s 9 UDBMS");
+    env.EraseClients();
+}
+
+void KillAllServers() {
+    close(env.GetClient().GetSocket());
+    system("killall -s 9 UDBMS");
+    env.EraseClients();
+}
+
+void StartServer() {
+    close(env.GetClient().GetSocket());
+    env.EraseClients();
+    system("../UDBMS &");
+    sleep(1);
+    env.AddClient();
+}
+
+
+::testing::AssertionResult TestDBMS(const std::string &input, const std::string &expected = "", int client_number = 0) {
     std::stringstream buffer_cout;
     std::stringstream buffer_cerr;
     std::streambuf *old_cerr = std::cerr.rdbuf(buffer_cerr.rdbuf());
@@ -29,14 +89,15 @@ MyTestEnvironment env;
     buffer_cout.str("");
     buffer_cerr.str("");
 
-        env.GetClient().ClientCommunication(&env.GetClient().GetSocket(), input);
+    env.GetClient(client_number).ClientCommunication(&env.GetClient(client_number).GetSocket(), input);
 
-        std::cout.rdbuf(old_cerr);
-    std::cerr.rdbuf(old_cout);
+    std::cout.rdbuf(old_cout);
+    std::cerr.rdbuf(old_cerr);
 
     if (buffer_cout.str().empty())
         if (buffer_cerr.str() != expected + '\n')
-            return ::testing::AssertionFailure() << "got: " << buffer_cerr.str() << "expected: " << expected << std::endl;
+            return ::testing::AssertionFailure() << "got: " << buffer_cerr.str() << "expected: " << expected
+                                                 << std::endl;
         else return ::testing::AssertionSuccess();
     else if (buffer_cout.str() != expected + '\n')
         return ::testing::AssertionFailure() << "got: " << buffer_cout.str() << "expected: " << expected << std::endl;
@@ -70,7 +131,7 @@ TEST(PARSER_CHECK, NO_BRACKET_CASE) {
     TestDBMS("drop table a;");
 }
 
-TEST(BASE_FUNCTIONALITY, TABLE_CREATION_CASE){
+TEST(BASE_FUNCTIONALITY, TABLE_CREATION_CASE) {
     TestDBMS("create table a( a integer);");
     EXPECT_TRUE(TestDBMS("show create table a;", "*************************** 1. row ***************************\n"
                                                  "       Table: a\n"
@@ -80,7 +141,7 @@ TEST(BASE_FUNCTIONALITY, TABLE_CREATION_CASE){
     TestDBMS("drop table a;");
 }
 
-TEST(BASE_FUNCTIONALITY, TABLE_CREATION_UNIQUE_CASE){
+TEST(BASE_FUNCTIONALITY, TABLE_CREATION_UNIQUE_CASE) {
     TestDBMS("create table a( a integer UNIQUE);");
     EXPECT_TRUE(TestDBMS("show create table a;", "*************************** 1. row ***************************\n"
                                                  "       Table: a\n"
@@ -90,50 +151,51 @@ TEST(BASE_FUNCTIONALITY, TABLE_CREATION_UNIQUE_CASE){
     TestDBMS("drop table a;");
 }
 
-TEST(BASE_FUNCTIONALITY, TABLE_EXISTS_CASE){
+TEST(BASE_FUNCTIONALITY, TABLE_EXISTS_CASE) {
     TestDBMS("create table a( a integer UNIQUE);");
     EXPECT_TRUE(TestDBMS("Create table a( b float);", "Error 101: Table does already exist"));
     TestDBMS("drop table a;");
 }
 
-TEST(BASE_FUNCTIONALITY, TABLE_DOES_NOT_EXIST_CASE){
+TEST(BASE_FUNCTIONALITY, TABLE_DOES_NOT_EXIST_CASE) {
     EXPECT_TRUE(TestDBMS("drop table a;", "Error 100: Table does not exist"));
 }
 
-TEST(BASE_FUNCTIONALITY, SEVERAL_TABLES_DROP_CASE){
+TEST(BASE_FUNCTIONALITY, SEVERAL_TABLES_DROP_CASE) {
     TestDBMS("create table a(a integer);");
     TestDBMS("create table b(a integer);");
     TestDBMS("drop table a, b;");
-    EXPECT_TRUE(TestDBMS("drop table a;", "Error 100: Table does not exist") && TestDBMS("drop table b;", "Error 100: Table does not exist"));
+    EXPECT_TRUE(TestDBMS("drop table a;", "Error 100: Table does not exist") &&
+                TestDBMS("drop table b;", "Error 100: Table does not exist"));
 }
 
-TEST(BASE_FUNCTIONALITY, LOTS_OF_COLUMNS_CASE){
+TEST(BASE_FUNCTIONALITY, LOTS_OF_COLUMNS_CASE) {
     TestDBMS("create table a(a integer,"
-                "b integer,"
-                "c integer,"
-                "d integer,"
-                "e integer,"
-                "f integer,"
-                "g integer,"
-                "h integer,"
-                "i integer,"
-                "j integer,"
-                "k integer,"
-                "l integer,"
-                "m integer,"
-                "n integer,"
-                "o integer,"
-                "p integer,"
-                "q integer,"
-                "r integer,"
-                "s integer,"
-                "t integer,"
-                "u integer,"
-                "v integer,"
-                "w integer,"
-                "x integer,"
-                "y integer,"
-                "z integer);");
+             "b integer,"
+             "c integer,"
+             "d integer,"
+             "e integer,"
+             "f integer,"
+             "g integer,"
+             "h integer,"
+             "i integer,"
+             "j integer,"
+             "k integer,"
+             "l integer,"
+             "m integer,"
+             "n integer,"
+             "o integer,"
+             "p integer,"
+             "q integer,"
+             "r integer,"
+             "s integer,"
+             "t integer,"
+             "u integer,"
+             "v integer,"
+             "w integer,"
+             "x integer,"
+             "y integer,"
+             "z integer);");
     EXPECT_TRUE(TestDBMS("show create table a;", "*************************** 1. row ***************************\n"
                                                  "       Table: a\n"
                                                  "Create Table: CREATE TABLE `a` (\n"
@@ -168,7 +230,7 @@ TEST(BASE_FUNCTIONALITY, LOTS_OF_COLUMNS_CASE){
 }
 
 
-TEST(DATA_FUNCTIONALITY, INSERT_VALUE_CASE){
+TEST(DATA_FUNCTIONALITY, INSERT_VALUE_CASE) {
     TestDBMS("create table a(id integer);");
     TestDBMS("insert into a(id) values(1)");
     EXPECT_TRUE(TestDBMS("select id from a;", "+----+\n"
@@ -179,25 +241,25 @@ TEST(DATA_FUNCTIONALITY, INSERT_VALUE_CASE){
     TestDBMS("drop table a;");
 }
 
-TEST(DATA_FUNCTIONALITY, NO_COLUMN_CASE){
+TEST(DATA_FUNCTIONALITY, NO_COLUMN_CASE) {
     TestDBMS("create table a(id integer);");
     TestDBMS("insert into a(id) values(1)");
     EXPECT_TRUE(TestDBMS("select b from a;", "303:No such column!"));
     TestDBMS("drop table a;");
 }
 
-TEST(DATA_FUNCTIONALITY, MULTI_INSERT_AND_WILDCART_CASE){
+TEST(DATA_FUNCTIONALITY, MULTI_INSERT_AND_WILDCART_CASE) {
     TestDBMS("create table a( id integer, a integer, b integer);");
     TestDBMS("insert into a (id, a) values (1, 2);");
     EXPECT_TRUE(TestDBMS("select * from a;", "+----+---+---+\n"
-                                                      "| id | a | b |\n"
-                                                      "+----+---+---+\n"
-                                                      "| 1  | 2 | 0 |\n"
-                                                      "+----+---+---+"));
+                                             "| id | a | b |\n"
+                                             "+----+---+---+\n"
+                                             "| 1  | 2 | 0 |\n"
+                                             "+----+---+---+"));
     TestDBMS("drop table a;");
 }
 
-TEST(DATA_FUNCTIONALITY, REPOSITION_OF_COLUMN_NAMES_CASE){
+TEST(DATA_FUNCTIONALITY, REPOSITION_OF_COLUMN_NAMES_CASE) {
     TestDBMS("create table a( id integer, a integer, b integer);");
     TestDBMS("insert into a (id, a) values (1, 2);");
     EXPECT_TRUE(TestDBMS("select a,id from a;", "+---+----+\n"
@@ -208,7 +270,7 @@ TEST(DATA_FUNCTIONALITY, REPOSITION_OF_COLUMN_NAMES_CASE){
     TestDBMS("drop table a;");
 }
 
-TEST(DATA_FUNCTIONALITY, SEVERAL_SELECT_COLUMNS_IN_SELECT_CASE){
+TEST(DATA_FUNCTIONALITY, SEVERAL_SELECT_COLUMNS_IN_SELECT_CASE) {
     TestDBMS("create table a( id integer, a integer, b integer);");
     TestDBMS("insert into a (id, a) values (1, 2);");
     EXPECT_TRUE(TestDBMS("select id, a from a;", "+----+---+\n"
@@ -219,9 +281,187 @@ TEST(DATA_FUNCTIONALITY, SEVERAL_SELECT_COLUMNS_IN_SELECT_CASE){
     TestDBMS("drop table a;");
 }
 
-
-/*TEST(CONSISTENCY_TESTS, RECCONECTION_AFTER_SERVER_DIES_CASE){
-
+/*TEST(RANDOM_FUNC, RANDOM_CASE) {
+    std::queue<std::string> callstack;
+    int cnt = 0;
+    Generator a;
+    std::string b;
+    while (!exec("pidof UDBMS").empty()) {
+        b = a.GenerateRequest();
+        if (callstack.size() < 25)
+            callstack.push(b);
+        else {
+            callstack.push(b);
+            callstack.pop();
+        }
+        TestDBMS(b);
+        cnt++;
+        if (cnt >= 500) break;
+    }
+    if (cnt >= 1000) EXPECT_TRUE(true);
+    std::cout << "Server died at " << b << std::endl;
+    std::cout << cnt << " Tests passed" << std::endl;
+    std::cout << "==================Stack==================" << std::endl;
+    for (int i = 0; i < 25; i++) {
+        std::cout << i << ") " << callstack.front() << std::endl;
+        callstack.pop();
+    }
 }*/
 
+/*TEST(CONSISTENCY_TESTS, RECCONECTION_AFTER_SERVER_DIES_CASE) {
+    KillServer();
+    env.EraseClients();
+    StartServer();
+    StraightRequest("select * from a;");
+    EXPECT_TRUE(TestDBMS("drop table a;", "Error 100: Table does not exist"));
+    KillAllServers();
+    env.EraseClients();
+}
+
+TEST(CONSISTENCY_TESTS, WORKING_SERVER_IS_KILLED) {
+    StartServer();
+    usleep(500);
+    std::vector<bool> drop_pool;
+    TestDBMS("create table a(a integer,"
+             "b integer,"
+             "c integer,"
+             "d integer,"
+             "e integer,"
+             "f integer,"
+             "g integer,"
+             "h integer,"
+             "i integer,"
+             "j integer,"
+             "k integer,"
+             "l integer,"
+             "m integer,"
+             "n integer,"
+             "o integer,"
+             "p integer,"
+             "q integer,"
+             "r integer,"
+             "s integer,"
+             "t integer,"
+             "u integer,"
+             "v integer,"
+             "w integer,"
+             "x integer,"
+             "y integer,"
+             "z integer);");
+    for (int i = 2; i < 40; ++i) {
+        system("cp -f a.dat a1.dat");
+        std::stringstream buffer_cout;
+        std::streambuf *old_cout = std::cout.rdbuf(buffer_cout.rdbuf());
+
+        buffer_cout.str("");
+
+        StraightRequest("select * from a;");
+        std::string buf = buffer_cout.str();
+        std::thread a = std::thread([i](){KillServer(7.5*996200);});
+        a.detach();
+
+        TestDBMS("insert into a (a, b, c , d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z) "
+                 "values(0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5);");
+        TestDBMS("insert into a (a, b, c , d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z) "
+                 "values(0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5);");
+        TestDBMS("insert into a (a, b, c , d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z) "
+                 "values(0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5);");
+        TestDBMS("insert into a (a, b, c , d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z) "
+                 "values(0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5);");
+        sleep(1);
+        StartServer();
+        buffer_cout.str("");
+        StraightRequest("select * from a;");
+        std::string buf_after = buffer_cout.str();
+        std::cout.rdbuf(old_cout);
+        if(!((exec("cmp a.dat a1.dat").empty())^(strcmp(buf.c_str(), buf_after.c_str()) == 0))) {
+            StraightRequest("select * from a;");
+        }
+    }
+    for (int i = 0; i< drop_pool.size(); i++)
+        std::cout << drop_pool[i];
+    TestDBMS("drop table a;");
+    KillAllServers();
+}*/
+
+TEST(MVCC, TESTING_TWO_UPDATES){
+    env.AddClient();
+    TestDBMS("create table a(a integer, b integer, c integer, d integer);");
+
+    for (int i = 0; i < 1000; ++i) {
+        TestDBMS("insert into a (a,b,c,d) values (" + toString<int>(i % 3) + "," + toString<int>(i % 4) +
+                 "," + toString<int>(i % 5) + "," + toString<int>(i % 6) + ");");
+    }
+
+
+    std::thread a = std::thread([](){env.GetClient().ClientCommunication(&env.GetClient().GetSocket(),
+                                     "update a set a = 6 where (a = 0);");});
+    std::thread b = std::thread([](){env.GetClient(1).ClientCommunication(&env.GetClient(1).GetSocket(),
+                                     "update a set a = 8 where (a = 6);");});
+    a.detach();
+    b.join();
+
+    std::stringstream buffer_cout;
+    std::stringstream buffer_cerr;
+    std::streambuf *old_cerr = std::cerr.rdbuf(buffer_cerr.rdbuf());
+    std::streambuf *old_cout = std::cout.rdbuf(buffer_cout.rdbuf());
+
+    buffer_cout.str("");
+    buffer_cerr.str("");
+
+    env.GetClient().ClientCommunication(&env.GetClient().GetSocket(), "select * from a where a = 6");
+    std::string buf1 = buffer_cout.str();
+    buffer_cout.clear();
+    env.GetClient().ClientCommunication(&env.GetClient().GetSocket(), "select * from a where a = 8");
+    std::string buf2 = buffer_cout.str();
+    buffer_cout.clear();
+    env.GetClient().ClientCommunication(&env.GetClient().GetSocket(), "select * from a where a = 200");
+    std::string buf_exotic = buffer_cout.str();
+    buffer_cout.clear();
+
+    std::cout.rdbuf(old_cout);
+    std::cerr.rdbuf(old_cerr);
+
+    EXPECT_TRUE(!strcmp(buf1.c_str(), buf2.c_str()) || !strcmp(buf1.c_str(), buf_exotic.c_str()) ||
+    !strcmp(buf2.c_str(), buf_exotic.c_str()));
+    TestDBMS("drop table a;");
+}
+
+TEST(MVCC, DIRTY_READ){
+    TestDBMS("create table a(a integer, b integer, c integer, d integer);");
+    TestDBMS("create table a(a integer, b integer, c integer, d integer);");
+
+
+    for (int i = 0; i < 1000; ++i) {
+        TestDBMS("insert into a (a,b,c,d) values (" + toString<int>(i % 3) + "," + toString<int>(i % 4) +
+                 "," + toString<int>(i % 5) + "," + toString<int>(i % 6) + ");");
+        TestDBMS("insert into b (a,b,c,d) values (" + toString<int>(i % 3) + "," + toString<int>(i % 4) +
+                 "," + toString<int>(i % 5) + "," + toString<int>(i % 6) + ");");
+    }
+    TestDBMS("update b set a = 6 where (a = 0);");
+
+    std::stringstream buffer_cout;
+    std::stringstream buffer_cerr;
+    std::streambuf *old_cerr = std::cerr.rdbuf(buffer_cerr.rdbuf());
+    std::streambuf *old_cout = std::cout.rdbuf(buffer_cout.rdbuf());
+
+    buffer_cout.str("");
+    buffer_cerr.str("");
+
+    env.GetClient().ClientCommunication(&env.GetClient().GetSocket(), "select * from b where (a=6);");
+
+    std::string buf1 = buffer_cout.str();
+    buffer_cout.str("");
+
+    std::thread a = std::thread([](){env.GetClient().ClientCommunication(&env.GetClient().GetSocket(),
+                                     "update a set a = 6 where (a = 0);");});
+    std::thread b = std::thread([](){env.GetClient(1).ClientCommunication(&env.GetClient(1).GetSocket(),
+                                                                         "select * from a where (a = 6);");});
+
+    std::cout.rdbuf(old_cout);
+    std::cerr.rdbuf(old_cerr);
+    a.detach();
+    b.join();
+
+}
 

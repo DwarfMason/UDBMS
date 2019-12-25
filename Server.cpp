@@ -65,12 +65,6 @@ void  Server::ClientTask(int id) {
         }
 
         {  //Блок закрытый lock_guard
-            std::lock_guard<std::mutex> lock(m);
-
-            std::stringstream buffer_cout;
-            std::stringstream buffer_cerr;
-            std::streambuf *old_cerr = std::cerr.rdbuf(buffer_cerr.rdbuf());
-            std::streambuf *old_cout = std::cout.rdbuf(buffer_cout.rdbuf());
 
             buffer_cout.str("");
             buffer_cerr.str("");
@@ -81,8 +75,7 @@ void  Server::ClientTask(int id) {
 
             driver.parse(from_client);
 
-            std::cout.rdbuf(old_cerr);
-            std::cerr.rdbuf(old_cout);
+
 
             char *send_data = strdup(buffer_cout.str().c_str());
             char *send_cerr = strdup(buffer_cerr.str().c_str());

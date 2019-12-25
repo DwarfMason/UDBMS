@@ -14,6 +14,7 @@
 #include "Generator.h"
 
 #define TESTING true
+#define PORT 2083
 
 
 class Client {

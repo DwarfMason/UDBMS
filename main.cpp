@@ -3,7 +3,7 @@
 #include <fstream>
 #include "Server.h"
 
-#define PORT 2080
+#define PORT 2083
 
 int main() {
     FILE *config;
@@ -17,10 +17,12 @@ int main() {
         out.close();
     }
 
+
     Server server{};
     server.ServerInit(PORT);
 
-
+    std::cout.rdbuf(server.old_cerr);
+    std::cerr.rdbuf(server.old_cout);
     /*for (int i = 0; i < 35; i++)
         tid[i].join();*/
 }
